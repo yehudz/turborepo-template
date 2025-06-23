@@ -1,0 +1,6 @@
+#\!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run lint and typecheck before commit
+npm run lint
+npm run check-types
