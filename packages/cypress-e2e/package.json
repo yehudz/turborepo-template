@@ -10,6 +10,7 @@
     "test:shared": "cypress run --spec 'cypress/e2e/shared/**/*'"
   },
   "devDependencies": {
+    "@repo/types": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "cypress": "^13.15.2",
     "typescript": "5.8.2"
