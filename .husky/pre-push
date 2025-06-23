@@ -3,6 +3,6 @@
 
 # Run lint, typecheck, build and tests before push
 npm run lint
-npm run check-types
+npm run typecheck
 npm run build
 npm run test

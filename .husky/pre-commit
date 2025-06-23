@@ -3,4 +3,4 @@
 
 # Run lint and typecheck before commit
 npm run lint
-npm run check-types
+npm run typecheck
