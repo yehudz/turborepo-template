@@ -1,8 +1,5 @@
-#\!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
-# Run lint, typecheck, build and tests before push
+# Run lint, typecheck and build before push
+# Note: E2E tests must be run manually with apps running (pnpm dev)
 npm run lint
 npm run typecheck
 npm run build
-npm run test

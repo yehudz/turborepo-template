@@ -7,6 +7,14 @@
     "moduleResolution": "Bundler",
     "allowJs": true,
     "jsx": "preserve",
-    "noEmit": true
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@components/*": ["./components/*"],
+      "@containers/*": ["./containers/*"],
+      "@providers/*": ["./providers/*"],
+      "@lib/*": ["./lib/*"],
+      "@utils/*": ["./utils/*"]
+    }
   }
 }
