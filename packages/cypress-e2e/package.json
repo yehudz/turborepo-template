@@ -1,0 +1,17 @@
+{
+  "name": "@repo/cypress-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "cypress run",
+    "test:open": "cypress open",
+    "test:web": "cypress run --spec 'cypress/e2e/apps/web/**/*'",
+    "test:docs": "cypress run --spec 'cypress/e2e/apps/docs/**/*'",
+    "test:shared": "cypress run --spec 'cypress/e2e/shared/**/*'"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "cypress": "^13.15.2",
+    "typescript": "5.8.2"
+  }
+}
