@@ -6,7 +6,7 @@ export default defineConfig({
     viewportWidth: 1280,
     viewportHeight: 720,
     video: false,
-    screenshotOnRunFailure: true,
+    screenshotOnRunFailure: false,
     supportFile: 'cypress/support/e2e.ts',
     specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
     setupNodeEvents(on, config) {
