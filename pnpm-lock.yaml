@@ -35,6 +35,9 @@ importers:
 
   apps/docs:
     dependencies:
+      '@repo/constants':
+        specifier: workspace:*
+        version: link:../../packages/constants
       '@repo/env':
         specifier: workspace:*
         version: link:../../packages/env
@@ -96,6 +99,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@repo/constants':
+        specifier: workspace:*
+        version: link:../../packages/constants
       '@repo/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -154,6 +160,15 @@ importers:
       tailwindcss:
         specifier: ^4.1.5
         version: 4.1.5
+      typescript:
+        specifier: 5.8.2
+        version: 5.8.2
+
+  packages/constants:
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
       typescript:
         specifier: 5.8.2
         version: 5.8.2
