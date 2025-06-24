@@ -1,60 +1,195 @@
-# Turborepo Tailwind CSS starter
+# Turborepo Template with TypeScript, Tailwind CSS, Clerk Auth & Prisma
 
-This Turborepo starter is maintained by the Turborepo core team.
+A production-ready turborepo template with authentication, database, and CI/CD setup for Google Cloud Platform (GCP).
 
-## Using this example
+## 🚀 What's Inside
 
-Run the following command:
+This template includes:
 
-```sh
-npx create-turbo@latest -e with-tailwind
+- **Apps:**
+  - `web` - Next.js 15 app with Clerk authentication
+  - `docs` - Next.js 15 documentation app
+- **Packages:**
+  - `@repo/ui` - Shared React components with Tailwind CSS
+  - `@repo/auth` - Clerk authentication configuration
+  - `@repo/database` - Prisma ORM with PostgreSQL
+  - `@repo/env` - Environment variable validation
+  - `@repo/types` - Shared TypeScript types
+  - `@repo/constants` - Shared constants
+  - `@repo/cypress-e2e` - End-to-end testing
+
+## 📋 Prerequisites
+
+- Node.js 18+ 
+- pnpm 8+
+- Docker (for database)
+- Google Cloud CLI (for deployment)
+
+## 🛠️ Setup Instructions
+
+### 1. Clone and Install
+
+```bash
+git clone <your-repo-url>
+cd <your-project-name>
+pnpm install
 ```
 
-## What's inside?
+### 2. ⚠️ **CRITICAL**: Update Package Names
 
-This Turborepo includes the following packages/apps:
+**You MUST update these before starting development:**
 
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
-- `web`: another [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
-- `ui`: a stub React component library with [Tailwind CSS](https://tailwindcss.com/) shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Building packages/ui
-
-This example is set up to produce compiled styles for `ui` components into the `dist` directory. The component `.tsx` files are consumed by the Next.js apps directly using `transpilePackages` in `next.config.ts`. This was chosen for several reasons:
-
-- Make sharing one `tailwind.config.ts` to apps and packages as easy as possible.
-- Make package compilation simple by only depending on the Next.js Compiler and `tailwindcss`.
-- Ensure Tailwind classes do not overwrite each other. The `ui` package uses a `ui-` prefix for it's classes.
-- Maintain clear package export boundaries.
-
-Another option is to consume `packages/ui` directly from source without building. If using this option, you will need to update the `tailwind.config.ts` in your apps to be aware of your package locations, so it can find all usages of the `tailwindcss` class names for CSS compilation.
-
-For example, in [tailwind.config.ts](packages/tailwind-config/tailwind.config.ts):
-
-```js
-  content: [
-    // app content
-    `src/**/*.{js,ts,jsx,tsx}`,
-    // include packages if not transpiling
-    "../../packages/ui/*.{js,ts,jsx,tsx}",
-  ],
+1. **Root package.json** - Change project name:
+```json
+{
+  "name": "your-project-name"  // Change from "with-tailwind"
+}
 ```
 
-If you choose this strategy, you can remove the `tailwindcss` and `autoprefixer` dependencies from the `ui` package.
+2. **Update workspace package names** in each `package.json`:
+```bash
+# Find all package.json files and update @repo/* names
+packages/*/package.json
+apps/*/package.json
+```
 
-### Utilities
+### 3. 🔐 Environment Variables Setup
 
-This Turborepo has some additional tools already setup for you:
+#### **Required Environment Variables**
 
-- [Tailwind CSS](https://tailwindcss.com/) for styles
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-# turborepo-template
-# turborepo-template
+Copy the environment files and update with your actual values:
+
+```bash
+# Root environment
+cp .env.example .env.local
+
+# Database environment  
+cp packages/database/.env.example packages/database/.env
+```
+
+#### **🚨 MUST UPDATE - Environment Variables**
+
+| Variable | Location | Description | How to Get |
+|----------|----------|-------------|------------|
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | `.env.local` | Clerk auth public key | [Clerk Dashboard](https://dashboard.clerk.com) → Your App → API Keys |
+| `CLERK_SECRET_KEY` | `.env.local` | Clerk auth secret key | [Clerk Dashboard](https://dashboard.clerk.com) → Your App → API Keys |
+| `DATABASE_URL` | `.env.local` | PostgreSQL connection string | See Database Setup below |
+| `NEXT_PUBLIC_APP_URL` | `.env.local` | Your app URL | `http://localhost:3000` (dev) or your domain |
+| `NEXT_PUBLIC_API_URL` | `.env.local` | Your API URL | `http://localhost:3000/api` (dev) or your API domain |
+| `JWT_SECRET` | `.env.local` | JWT signing secret | Generate: `openssl rand -base64 32` |
+
+### 4. 🗃️ Database Setup
+
+#### **Local Development (SQLite)**
+```bash
+# Uses file-based SQLite (default)
+DATABASE_URL="file:./dev.db"
+pnpm db:generate
+pnpm db:push
+```
+
+#### **Production (PostgreSQL)**
+```bash
+# Update DATABASE_URL to PostgreSQL connection string
+DATABASE_URL="postgresql://username:password@host:port/database"
+pnpm db:generate  
+pnpm db:migrate
+```
+
+### 5. 🔧 Authentication Setup (Clerk)
+
+1. **Create Clerk Account**: [https://clerk.com](https://clerk.com)
+2. **Create Application** in Clerk Dashboard
+3. **Copy API Keys** to your `.env.local`
+4. **Configure Allowed Domains**:
+   - Development: `localhost:3000`, `localhost:3001`
+   - Production: Your actual domains
+
+### 6. 🚀 Development
+
+```bash
+# Start all apps and packages in development mode
+pnpm dev
+
+# Run tests (requires dev servers to be running)
+pnpm test
+
+# Build for production
+pnpm build
+
+# Lint code
+pnpm lint
+
+# Type check
+pnpm typecheck
+```
+
+## 📝 Development Workflow
+
+1. **Feature Development**:
+   ```bash
+   git checkout -b feature/your-feature
+   pnpm dev  # Start development servers
+   # Make changes
+   pnpm test  # Run tests
+   pnpm lint  # Check code quality
+   ```
+
+2. **Testing**:
+   ```bash
+   # Terminal 1: Keep dev servers running
+   pnpm dev
+   
+   # Terminal 2: Run tests
+   pnpm test
+   ```
+
+3. **Deployment**:
+   ```bash
+   git push origin main  # Triggers CI/CD pipeline
+   ```
+
+## 🏗️ Infrastructure & Deployment
+
+For GCP deployment, Cloud Build setup, and infrastructure configuration, see:
+
+- **Infrastructure Documentation**: `infrastructure/README.md`
+- **Terraform Configurations**: `infrastructure/terraform/`
+- **Docker Configurations**: `Dockerfile` in each app
+- **CI/CD Pipeline**: `infrastructure/cloudbuild.yaml`
+
+## 🚨 **CHECKLIST: What to Update Before Going Live**
+
+- [ ] Update project name in root `package.json`
+- [ ] Update all `@repo/*` package names
+- [ ] Set up Clerk account and update auth keys
+- [ ] Configure production database connection string
+- [ ] Update environment variables for production
+- [ ] Follow infrastructure setup guide in `infrastructure/README.md`
+- [ ] Update app URLs in environment variables
+- [ ] Test deployment pipeline
+- [ ] Update domain names and SSL certificates
+
+## 📚 Additional Resources
+
+- [Turborepo Documentation](https://turbo.build/repo/docs)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Clerk Authentication](https://clerk.com/docs)
+- [Prisma Documentation](https://www.prisma.io/docs)
+
+## 🆘 Troubleshooting
+
+### Common Issues:
+
+1. **Environment variables not loaded**: Ensure `.env.local` is in the root directory
+2. **Database connection failed**: Check `DATABASE_URL` format and credentials
+3. **Clerk authentication errors**: Verify API keys and allowed domains
+4. **Build failures**: Check TypeScript errors with `pnpm typecheck`
+5. **Tests failing**: Ensure dev servers are running before running tests
+
+### Getting Help:
+
+- Check the specific app READMEs in `apps/web/README.md` and `apps/docs/README.md`
+- Review package documentation in `packages/*/README.md`
+- Check environment variable validation in `packages/env/src/`
+- Review infrastructure setup in `infrastructure/README.md`
