@@ -1,0 +1,30 @@
+# Copy this file to terraform.tfvars and fill in your actual values
+# terraform.tfvars is gitignored for security
+
+# Project Configuration
+project_id  = "your-gcp-project-id"
+region      = "us-central1"
+environment = "dev"
+
+# Database Configuration (generate a strong password)
+database_password = "your-secure-database-password-here"
+
+# Clerk Authentication (get from https://dashboard.clerk.com)
+clerk_secret_key      = "sk_test_your_clerk_secret_key_here"
+clerk_publishable_key = "pk_test_your_clerk_publishable_key_here"
+clerk_webhook_secret  = "whsec_your_webhook_secret_here"
+
+# JWT Configuration (generate a random 32+ character string)
+jwt_secret = "your-super-secret-jwt-key-at-least-32-characters-long"
+
+# Application URLs
+app_url = "https://your-app.com"
+api_url = "https://your-app.com/api"
+
+# Optional: Override default resource configurations for cost optimization
+# database_tier              = "db-f1-micro"    # Cheapest option
+# database_disk_size         = 10               # Minimum SSD size
+# cloud_run_cpu              = "1"              # Minimum CPU
+# cloud_run_memory           = "512Mi"          # Minimum memory
+# cloud_run_min_instances    = 0                # Scale to zero
+# cloud_run_max_instances    = 10               # Reasonable limit

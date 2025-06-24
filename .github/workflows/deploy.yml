@@ -1,0 +1,158 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # Allow manual deployment
+
+# Prevent concurrent deployments
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy to Cloud Run
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    # Required permissions for workload identity
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Build web app
+        run: pnpm --filter web build
+
+      # Authenticate to Google Cloud using Workload Identity
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - name: Setup Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ vars.REGION }}-docker.pkg.dev
+
+      - name: Create Dockerfile for web app
+        run: |
+          cat > apps/web/Dockerfile << 'EOF'
+          FROM node:18-alpine AS base
+          
+          # Install dependencies only when needed
+          FROM base AS deps
+          RUN apk add --no-cache libc6-compat
+          WORKDIR /app
+          
+          # Install pnpm
+          RUN npm install -g pnpm
+          
+          # Copy package files
+          COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+          COPY packages/ packages/
+          COPY apps/web/package.json apps/web/
+          
+          # Install dependencies
+          RUN pnpm install --frozen-lockfile --prod
+          
+          # Rebuild the source code only when needed
+          FROM base AS builder
+          WORKDIR /app
+          RUN npm install -g pnpm
+          
+          COPY --from=deps /app/node_modules ./node_modules
+          COPY . .
+          
+          # Build packages first
+          RUN pnpm build
+          
+          # Build the web app
+          RUN pnpm --filter web build
+          
+          # Production image
+          FROM base AS runner
+          WORKDIR /app
+          
+          ENV NODE_ENV production
+          
+          RUN addgroup --system --gid 1001 nodejs
+          RUN adduser --system --uid 1001 nextjs
+          
+          # Copy built application
+          COPY --from=builder /app/apps/web/public ./public
+          COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
+          COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
+          
+          USER nextjs
+          
+          EXPOSE 3000
+          
+          ENV PORT 3000
+          ENV HOSTNAME "0.0.0.0"
+          
+          CMD ["node", "apps/web/server.js"]
+          EOF
+
+      - name: Build and push Docker image
+        run: |
+          IMAGE_URL="${{ vars.REGION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPO }}/web:${{ github.sha }}"
+          
+          docker build -t $IMAGE_URL -f apps/web/Dockerfile .
+          docker push $IMAGE_URL
+          
+          echo "IMAGE_URL=$IMAGE_URL" >> $GITHUB_ENV
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy web-app \
+            --image ${{ env.IMAGE_URL }} \
+            --region ${{ vars.REGION }} \
+            --platform managed \
+            --allow-unauthenticated \
+            --port 3000 \
+            --memory 512Mi \
+            --cpu 1 \
+            --min-instances 0 \
+            --max-instances 10 \
+            --vpc-connector ${{ vars.VPC_CONNECTOR }} \
+            --set-env-vars NODE_ENV=production \
+            --set-secrets DATABASE_URL=DATABASE_URL:latest \
+            --set-secrets CLERK_SECRET_KEY=CLERK_SECRET_KEY:latest \
+            --set-secrets CLERK_WEBHOOK_SECRET=CLERK_WEBHOOK_SECRET:latest \
+            --set-secrets JWT_SECRET=JWT_SECRET:latest \
+            --set-secrets NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:latest \
+            --set-secrets NEXT_PUBLIC_APP_URL=NEXT_PUBLIC_APP_URL:latest \
+            --set-secrets NEXT_PUBLIC_API_URL=NEXT_PUBLIC_API_URL:latest \
+            --set-secrets GOOGLE_CLOUD_BUCKET_NAME=GOOGLE_CLOUD_BUCKET_NAME:latest
+
+      - name: Get service URL
+        run: |
+          SERVICE_URL=$(gcloud run services describe web-app --region ${{ vars.REGION }} --format 'value(status.url)')
+          echo "Deployed to: $SERVICE_URL"
+          echo "SERVICE_URL=$SERVICE_URL" >> $GITHUB_OUTPUT
