@@ -12,6 +12,10 @@ const serverSchema = z.object({
   
   // API Keys (add as needed)
   JWT_SECRET: z.string().min(32, 'JWT secret must be at least 32 characters').optional(),
+  
+  // Clerk Configuration
+  CLERK_SECRET_KEY: z.string().min(1, 'Clerk secret key is required'),
+  CLERK_WEBHOOK_SECRET: z.string().optional(),
 })
 
 export const serverEnv = serverSchema.parse(process.env)

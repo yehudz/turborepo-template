@@ -73,6 +73,62 @@ export interface AuthSessionI {
   expiresAt: Date
 }
 
+// Clerk Auth Interfaces
+export interface ClerkUserI {
+  id: string
+  email: string
+  firstName?: string
+  lastName?: string
+  imageUrl?: string
+  role?: UserRoleE
+  preferences?: UserPreferencesI
+}
+
+export interface AuthStateI {
+  isLoaded: boolean
+  isSignedIn: boolean
+  user: ClerkUserI | null
+}
+
+export interface ClerkSessionI {
+  id: string
+  userId: string
+  status: 'active' | 'expired' | 'ended'
+  lastActiveAt: Date
+  expireAt: Date
+}
+
+export interface AuthContextI {
+  user: ClerkUserI | null
+  isLoaded: boolean
+  isSignedIn: boolean
+  signOut: () => Promise<void>
+  openSignIn: () => void
+  openUserProfile: () => void
+}
+
+export interface PermissionI {
+  action: string
+  resource: string
+}
+
+export interface RolePermissionsI {
+  [key: string]: PermissionI[]
+}
+
+export interface AuthMiddlewareOptionsI {
+  publicRoutes?: string[]
+  ignoredRoutes?: string[]
+  protectedRoutes?: string[]
+  requireAuth?: boolean
+}
+
+export interface ClerkWebhookPayloadI {
+  type: string
+  data: any
+  object: string
+}
+
 export interface ToastMessageI {
   id: string
   type: ToastTypeE
