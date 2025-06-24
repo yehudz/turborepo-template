@@ -1,0 +1,92 @@
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Testing
+coverage
+*.tsbuildinfo
+
+# Next.js
+.next/
+out/
+
+# Production
+dist/
+build/
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Local env files
+.env*.local
+.env
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+
+# Turbo
+.turbo
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Cypress
+cypress/videos
+cypress/screenshots
+
+# Storybook build outputs
+storybook-static
+
+# Git
+.git
+.gitignore
+README.md
+
+# CI/CD
+.github
+
+# Documentation
+docs/
+*.md
+
+# Infrastructure
+infrastructure/
+
+# Development files
+docker-compose*.yml
