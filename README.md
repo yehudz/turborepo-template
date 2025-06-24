@@ -35,7 +35,16 @@ cd <your-project-name>
 pnpm install
 ```
 
-### 2. ⚠️ **CRITICAL**: Update Package Names
+### 2. 🔐 Create Environment File
+
+```bash
+# REQUIRED: Copy template and add your actual values
+cp .env.example .env.local
+```
+
+**Then open `.env.local` and replace the placeholder values with real ones (see step 3 below).**
+
+### 3. ⚠️ **CRITICAL**: Update Package Names
 
 **You MUST update these before starting development:**
 
@@ -53,19 +62,7 @@ packages/*/package.json
 apps/*/package.json
 ```
 
-### 3. 🔐 Environment Variables Setup
-
-#### **Required Environment Variables**
-
-Copy the environment files and update with your actual values:
-
-```bash
-# Root environment
-cp .env.example .env.local
-
-# Database environment  
-cp packages/database/.env.example packages/database/.env
-```
+### 4. 🔐 Environment Variables Setup
 
 #### **🚨 MUST UPDATE - Environment Variables**
 
@@ -78,7 +75,7 @@ cp packages/database/.env.example packages/database/.env
 | `NEXT_PUBLIC_API_URL` | `.env.local` | Your API URL | `http://localhost:3000/api` (dev) or your API domain |
 | `JWT_SECRET` | `.env.local` | JWT signing secret | Generate: `openssl rand -base64 32` |
 
-### 4. 🗃️ Database Setup
+### 5. 🗃️ Database Setup
 
 #### **Local Development (SQLite)**
 ```bash
@@ -96,7 +93,7 @@ pnpm db:generate
 pnpm db:migrate
 ```
 
-### 5. 🔧 Authentication Setup (Clerk)
+### 6. 🔧 Authentication Setup (Clerk)
 
 1. **Create Clerk Account**: [https://clerk.com](https://clerk.com)
 2. **Create Application** in Clerk Dashboard
@@ -105,9 +102,15 @@ pnpm db:migrate
    - Development: `localhost:3000`, `localhost:3001`
    - Production: Your actual domains
 
-### 6. 🚀 Development
+### 7. 🚀 Development
 
 ```bash
+# Validate environment variables (recommended first step)
+pnpm validate-env
+
+# Quick setup: validate env + generate database
+pnpm setup
+
 # Start all apps and packages in development mode
 pnpm dev
 

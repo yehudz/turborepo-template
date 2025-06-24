@@ -4,52 +4,58 @@ This monorepo uses path aliases for clean, consistent imports across all apps.
 
 ## Available Aliases
 
-- `@components/*` - UI components with default exports
-- `@containers/*` - Container components that manage state
-- `@providers/*` - React context providers
+- `@components/*` - React components (create this directory as needed)
+- `@containers/*` - Container components that manage state (create as needed)
+- `@providers/*` - React context providers (create as needed)
 - `@lib/*` - Library functions and API clients
-- `@utils/*` - Utility functions and helpers
+- `@utils/*` - Utility functions and helpers (create as needed)
 
 ## Usage Examples
 
 ```typescript
-// Components (default exports)
+// Library functions (currently available)
+import { apiClient } from '@lib/api'
+
+// Components (create directories as needed)
 import Button from '@components/Button'
 import Modal from '@components/Modal'
 
-// Containers (default exports)
+// Containers (create directories as needed)
 import UserContainer from '@containers/UserContainer'
-import PostContainer from '@containers/PostContainer'
 
-// Providers (default exports)
+// Providers (create directories as needed)
 import ThemeProvider from '@providers/ThemeProvider'
-import AuthProvider from '@providers/AuthProvider'
 
-// Library functions
-import apiClient from '@lib/api'
-import { validateUser } from '@lib/validation'
-
-// Utilities
-import dateUtils from '@utils/date'
+// Utilities (create directories as needed)
 import { formatCurrency } from '@utils/formatting'
 ```
 
-## Directory Structure
+## Current Directory Structure
 
 ```
 apps/web/
-├── components/     # Reusable UI components
-├── containers/     # Stateful container components
-├── providers/      # React context providers
-├── lib/           # Library code, API clients
-└── utils/         # Pure utility functions
+├── app/           # Next.js App Router pages
+├── lib/           # Library code, API clients (✅ exists)
+└── public/        # Static assets
 
 apps/docs/
-├── components/     # Same structure
-├── containers/
-├── providers/
-├── lib/
-└── utils/
+├── app/           # Next.js App Router pages
+├── lib/           # Library code (✅ exists)
+└── public/        # Static assets
+```
+
+## Creating New Directories
+
+The path aliases are already configured in TypeScript. Simply create the directories as you need them:
+
+```bash
+# Add components directory
+mkdir apps/web/components
+mkdir apps/docs/components
+
+# Add other directories as needed
+mkdir apps/web/utils
+mkdir apps/web/providers
 ```
 
 ## Configuration

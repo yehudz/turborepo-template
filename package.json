@@ -1,5 +1,5 @@
 {
-  "name": "with-tailwind",
+  "name": "turborepo-template",
   "private": true,
   "scripts": {
     "build": "turbo run build",
@@ -8,11 +8,17 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "prepare": "husky"
+    "prepare": "husky",
+    "db:generate": "turbo run db:generate",
+    "db:push": "turbo run db:push",
+    "db:migrate": "turbo run db:migrate",
+    "validate-env": "node scripts/validate-env.js",
+    "setup": "npm run validate-env && npm run db:generate"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
+    "dotenv": "^16.4.5",
     "eslint-import-resolver-typescript": "^4.4.3",
     "eslint-plugin-import": "^2.32.0",
     "husky": "^9.1.7",
