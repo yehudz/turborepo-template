@@ -1,0 +1,30 @@
+{
+  "name": "admin",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev --port 3000",
+    "lint": "eslint . --max-warnings 0",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@headlessui/react": "^2.2.0",
+    "@heroicons/react": "^2.1.5",
+    "next": "^15.1.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/tailwind-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^22.15.30",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.0",
+    "typescript": "5.8.2"
+  }
+}
