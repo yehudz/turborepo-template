@@ -1,11 +1,61 @@
-import { auth, currentUser } from '@clerk/nextjs/server'
-import type { UserRoleE, AuthErrorE } from '@repo/types'
-import type { PermissionI, RolePermissionsI } from '@repo/types'
+import { getServerClient, getSessionClient } from './config'
+import { cookies } from 'next/headers'
+import type { Session, User } from './types'
+import type { Models } from 'appwrite'
 
-// Get current user server-side
-export async function getCurrentUser() {
+/**
+ * Get current user session on the server side
+ */
+export async function getCurrentSession(): Promise<Session | null> {
   try {
-    const user = await currentUser()
+    const cookieStore = await cookies()
+    const sessionCookie = cookieStore.get('session')
+    
+    if (!sessionCookie) {
+      return null
+    }
+
+    const serverClient = await getServerClient()
+    const { Account } = await import('node-appwrite')
+    const serverAccount = new Account(serverClient)
+    
+    const session = await serverAccount.getSession(sessionCookie.value)
+    return session as Session
+  } catch (error) {
+    console.error('Error getting current session:', error)
+    return null
+  }
+}
+
+/**
+ * Get current user on the server side (Appwrite auth user only)
+ */
+export async function getCurrentUser(): Promise<User | null> {
+  try {
+    const cookieStore = await cookies()
+    const sessionCookie = cookieStore.get('session')
+    
+    if (!sessionCookie) {
+      return null
+    }
+
+    // Use session client for user-specific operations
+    const sessionClient = getSessionClient(sessionCookie.value)
+    const { Account } = await import('appwrite')
+    const sessionAccount = new Account(sessionClient)
+    
+    const appwriteUser: Models.User<Models.Preferences> = await sessionAccount.get()
+    
+    // Return simple auth user
+    const user: User = {
+      $id: appwriteUser.$id,
+      email: appwriteUser.email,
+      name: appwriteUser.name,
+      emailVerification: appwriteUser.emailVerification,
+      $createdAt: appwriteUser.$createdAt,
+      $updatedAt: appwriteUser.$updatedAt,
+    }
+    
     return user
   } catch (error) {
     console.error('Error getting current user:', error)
@@ -13,138 +63,80 @@ export async function getCurrentUser() {
   }
 }
 
-// Get current user ID server-side
-export async function getCurrentUserId() {
+/**
+ * Get current user ID
+ */
+export async function getCurrentUserId(): Promise<string | null> {
+  const user = await getCurrentUser()
+  return user?.$id || null
+}
+
+/**
+ * Get complete authentication state for server-side rendering
+ */
+export async function getAuthState(): Promise<{
+  isAuthenticated: boolean
+  user: User | null
+  session: Session | null
+}> {
   try {
-    const { userId } = await auth()
-    return userId
+    const cookieStore = await cookies()
+    const sessionCookie = cookieStore.get('session')
+    
+    if (!sessionCookie) {
+      return {
+        isAuthenticated: false,
+        user: null,
+        session: null
+      }
+    }
+
+    // Use session client approach
+    const sessionClient = getSessionClient(sessionCookie.value)
+    const { Account } = await import('appwrite')
+    const sessionAccount = new Account(sessionClient)
+    
+    const appwriteUser: Models.User<Models.Preferences> = await sessionAccount.get()
+    
+    const user: User = {
+      $id: appwriteUser.$id,
+      email: appwriteUser.email,
+      name: appwriteUser.name,
+      emailVerification: appwriteUser.emailVerification,
+      $createdAt: appwriteUser.$createdAt,
+      $updatedAt: appwriteUser.$updatedAt,
+    }
+
+    return {
+      isAuthenticated: true,
+      user,
+      session: null
+    }
   } catch (error) {
-    console.error('Error getting current user ID:', error)
-    return null
-  }
-}
-
-// Check if user is authenticated server-side
-export async function isAuthenticated() {
-  try {
-    const { userId } = await auth()
-    return !!userId
-  } catch (error) {
-    console.error('Error checking authentication:', error)
-    return false
-  }
-}
-
-// Role-based access control
-const rolePermissions: RolePermissionsI = {
-  admin: [
-    { action: '*', resource: '*' }, // Admin has all permissions
-  ],
-  user: [
-    { action: 'read', resource: 'add-your-resource-here' },
-    { action: 'create', resource: 'add-your-resource-here' },
-    { action: 'update', resource: 'add-your-resource-here' },
-    { action: 'delete', resource: 'add-your-resource-here' },
-    { action: 'read', resource: 'add-your-resource-here' },
-    { action: 'update', resource: 'add-your-resource-here' },
-  ],
-}
-
-// Check if user has permission
-export function hasPermission(
-  userRole: UserRoleE | undefined,
-  action: string,
-  resource: string
-): boolean {
-  if (!userRole) return false
-  
-  const permissions = rolePermissions[userRole] || []
-  
-  return permissions.some(permission => {
-    // Admin wildcard check
-    if (permission.action === '*' && permission.resource === '*') {
-      return true
+    console.error('Error getting auth state:', error)
+    return {
+      isAuthenticated: false,
+      user: null,
+      session: null
     }
-    
-    // Exact match
-    if (permission.action === action && permission.resource === resource) {
-      return true
-    }
-    
-    // Wildcard action
-    if (permission.action === '*' && permission.resource === resource) {
-      return true
-    }
-    
-    // Wildcard resource
-    if (permission.action === action && permission.resource === '*') {
-      return true
-    }
-    
-    return false
-  })
-}
-
-// Get user role from metadata
-export function getUserRole(user: any): UserRoleE | undefined {
-  return user?.publicMetadata?.role as UserRoleE | undefined
-}
-
-// Check if user is admin
-export function isAdmin(user: any): boolean {
-  return getUserRole(user) === 'admin'
-}
-
-// Route protection helpers
-export async function requireAuth(): Promise<{ userId: string }> {
-  const { userId } = await auth()
-  
-  if (!userId) {
-    throw new Error('Unauthorized: Authentication required')
   }
-  
-  return { userId }
 }
 
-export async function requireRole(requiredRole: UserRoleE): Promise<{ userId: string; user: any }> {
-  const { userId } = await auth()
-  
-  if (!userId) {
-    throw new Error('Unauthorized: Authentication required')
+/**
+ * Check if user is authenticated
+ */
+export async function isAuthenticated(): Promise<boolean> {
+  const authState = await getAuthState()
+  return authState.isAuthenticated
+}
+
+/**
+ * Require authentication - throws if not authenticated
+ */
+export async function requireAuth(): Promise<Session> {
+  const session = await getCurrentSession()
+  if (!session) {
+    throw new Error('Authentication required')
   }
-  
-  // Note: In a real app, you'd fetch the user and check their role
-  // This is a simplified version for the template
-  return { userId, user: null }
-}
-
-// Error handling - creates error with enum code (message should be localized in the app)
-export function createAuthError(type: AuthErrorE, message?: string): Error {
-  const error = new Error(message || type)
-  error.name = type
-  
-  return error
-}
-
-// Webhook signature verification
-export function verifyWebhookSignature(
-  payload: string,
-  signature: string,
-  secret: string
-): boolean {
-  // Note: Implement proper webhook signature verification
-  // This is a placeholder for the template
-  return true
-}
-
-// Utility to extract user info for database sync
-export function extractUserInfo(clerkUser: any) {
-  return {
-    id: clerkUser.id,
-    email: clerkUser.emailAddresses?.[0]?.emailAddress,
-    firstName: clerkUser.firstName,
-    lastName: clerkUser.lastName,
-    createdAt: new Date(clerkUser.createdAt),
-    updatedAt: new Date(clerkUser.updatedAt),
-  }
+  return session
 }

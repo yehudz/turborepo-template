@@ -1,44 +1,33 @@
-// Re-export Clerk components and hooks for convenience
+// Export Appwrite core clients and config
 export {
-  ClerkProvider,
-  SignIn,
-  SignUp,
-  UserButton,
-  UserProfile,
-  SignInButton,
-  SignUpButton,
-  SignOutButton,
-  useUser,
-  useAuth,
-  useClerk,
-  useSignIn,
-  useSignUp,
-} from '@clerk/nextjs'
+  getClientAppwrite,
+  getServerClient,
+  getSessionClient,
+  appwriteConfig,
+} from './config'
 
-export {
-  auth,
-  currentUser,
-} from '@clerk/nextjs/server'
-
-// Export our custom utilities
+// Export auth middleware
 export {
   authMiddleware,
-  clerkAppearance,
+  protectedRoutes,
   authPaths,
 } from './config'
 
+// Export server-side auth helpers
 export {
   getCurrentUser,
   getCurrentUserId,
+  getCurrentSession,
+  getAuthState,
   isAuthenticated,
-  hasPermission,
-  getUserRole,
-  isAdmin,
   requireAuth,
-  requireRole,
-  createAuthError,
-  verifyWebhookSignature,
-  extractUserInfo,
 } from './helpers'
 
-// Types are exported from @repo/types
+// Export server actions
+export {
+  signInServerAction,
+  signOutServerAction,
+} from './actions'
+
+// Export types
+export type { User, Session } from './types'
