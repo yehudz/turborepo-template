@@ -45,7 +45,7 @@ function handleData(data: UserDataI) {
 ### Before Creating Anything New:
 
 1. **UI Components** → Check `@repo/ui` package first (Shadcn/ui components)
-2. **Database Operations** → Use `@repo/database` package (never install `@prisma/client` directly)
+2. **Database Operations** → Use `@repo/database` package (PostgreSQL only, never install `@prisma/client` directly)
 3. **Authentication** → Use `@repo/auth` package
 4. **Types** → Check `@repo/types` package
 5. **Constants** → Use `@repo/constants` package

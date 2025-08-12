@@ -1,198 +1,301 @@
-# Turborepo Template with TypeScript, Tailwind CSS, Clerk Auth & Prisma
+# 🚀 Production-Ready Turborepo Template
 
-A production-ready turborepo template with authentication, database, and CI/CD setup for Google Cloud Platform (GCP).
+A plug-and-play monorepo template with **Shadcn/ui**, **Appwrite authentication**, **PostgreSQL**, and **Google Cloud deployment**.
 
-## 🚀 What's Inside
-
-This template includes:
-
-- **Apps:**
-  - `web` - Next.js 15 app with Clerk authentication
-  - `docs` - Next.js 15 documentation app
-- **Packages:**
-  - `@repo/ui` - Shared React components with Tailwind CSS
-  - `@repo/auth` - Clerk authentication configuration
-  - `@repo/database` - Prisma ORM with PostgreSQL
-  - `@repo/env` - Environment variable validation
-  - `@repo/types` - Shared TypeScript types
-  - `@repo/constants` - Shared constants
-  - `@repo/cypress-e2e` - End-to-end testing
-
-## 📋 Prerequisites
-
-- Node.js 18+ 
-- pnpm 8+
-- Docker (for database)
-- Google Cloud CLI (for deployment)
-
-## 🛠️ Setup Instructions
-
-### 1. Clone and Install
+## ⚡ Quick Start (5 minutes)
 
 ```bash
+# 1. Clone and install
 git clone <your-repo-url>
 cd <your-project-name>
 pnpm install
-```
 
-### 2. 🔐 Create Environment File
+# 2. Set up environment files
+pnpm setup:env
 
-```bash
-# REQUIRED: Copy template and add your actual values
-cp .env.example .env.local
-```
+# 3. Update .env.local with your Appwrite project ID (see Appwrite setup below)
 
-**Then open `.env.local` and replace the placeholder values with real ones (see step 3 below).**
+# 4. Start Docker Postgres
+docker-compose up postgres -d
 
-### 3. ⚠️ **CRITICAL**: Update Package Names
-
-**You MUST update these before starting development:**
-
-1. **Root package.json** - Change project name:
-```json
-{
-  "name": "your-project-name"  // Change from "with-tailwind"
-}
-```
-
-2. **Update workspace package names** in each `package.json`:
-```bash
-# Find all package.json files and update @repo/* names
-packages/*/package.json
-apps/*/package.json
-```
-
-### 4. 🔐 Environment Variables Setup
-
-#### **🚨 MUST UPDATE - Environment Variables**
-
-| Variable | Location | Description | How to Get |
-|----------|----------|-------------|------------|
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | `.env.local` | Clerk auth public key | [Clerk Dashboard](https://dashboard.clerk.com) → Your App → API Keys |
-| `CLERK_SECRET_KEY` | `.env.local` | Clerk auth secret key | [Clerk Dashboard](https://dashboard.clerk.com) → Your App → API Keys |
-| `DATABASE_URL` | `.env.local` | PostgreSQL connection string | See Database Setup below |
-| `NEXT_PUBLIC_APP_URL` | `.env.local` | Your app URL | `http://localhost:3000` (dev) or your domain |
-| `NEXT_PUBLIC_API_URL` | `.env.local` | Your API URL | `http://localhost:3000/api` (dev) or your API domain |
-| `JWT_SECRET` | `.env.local` | JWT signing secret | Generate: `openssl rand -base64 32` |
-
-### 5. 🗃️ Database Setup
-
-#### **Local Development (SQLite)**
-```bash
-# Uses file-based SQLite (default)
-DATABASE_URL="file:./dev.db"
+# 5. Set up database
 pnpm db:generate
+pnpm db:push
+
+# 6. Validate setup
+pnpm validate-env
+
+# 7. Start development
+pnpm dev
+```
+
+**🎉 Your apps are now running:**
+- Web app: http://localhost:3001
+- Admin app: http://localhost:3000
+
+## 📋 What's Inside
+
+### **Apps:**
+- `web` - Next.js 15 app with Appwrite auth (port 3001)
+- `admin` - Next.js 15 admin dashboard (port 3000)  
+- `api` - Express.js API server
+
+### **Packages:**
+- `@repo/ui` - Shadcn/ui components with Tailwind CSS v4
+- `@repo/auth` - Appwrite authentication (client + server)
+- `@repo/database` - Prisma ORM with PostgreSQL
+- `@repo/env` - Environment variable validation
+- `@repo/types` - Shared TypeScript types
+- `@repo/constants` - Application constants
+
+## 🛠️ Setup Instructions
+
+### Prerequisites
+
+- **Node.js 18+** 
+- **pnpm 8+**
+- **Docker** (for PostgreSQL)
+
+### 1. Environment Setup
+
+Create environment files:
+```bash
+# This creates both .env.local and packages/database/.env.local
+pnpm setup:env
+```
+
+Your `.env.local` will contain:
+```bash
+# Database - matches Docker Postgres credentials
+DATABASE_URL="postgresql://app_user:dev_password@localhost:5432/app_db"
+
+# Appwrite Authentication (get from https://cloud.appwrite.io/console)
+NEXT_PUBLIC_APPWRITE_PROJECT_ID="your_project_id_here"
+NEXT_PUBLIC_APPWRITE_URL="https://cloud.appwrite.io/v1"
+
+NODE_ENV="development"
+```
+
+### 2. Appwrite Authentication Setup
+
+1. **Create account**: Go to [https://cloud.appwrite.io](https://cloud.appwrite.io)
+
+2. **Create new project**: 
+   - Click "Create Project"
+   - Name your project (e.g., "My App")
+   - Copy the **Project ID** (looks like: `507f1f77bcf86cd799439011`)
+
+3. **Update environment**:
+   ```bash
+   # In .env.local - replace the placeholder
+   NEXT_PUBLIC_APPWRITE_PROJECT_ID="507f1f77bcf86cd799439011"
+   ```
+
+4. **Configure domains** (in Appwrite console):
+   - Go to your project → Settings → Platforms
+   - Add Web platform: `http://localhost:3001`
+   - Add Web platform: `http://localhost:3000`
+
+### 3. Database Setup (Docker PostgreSQL)
+
+Start PostgreSQL:
+```bash
+# Start Postgres in background
+docker-compose up postgres -d
+
+# Verify it's running
+docker-compose logs postgres
+```
+
+Set up the database:
+```bash
+# Generate Prisma client for @repo/database package
+pnpm db:generate
+
+# Create tables in database
 pnpm db:push
 ```
 
-#### **Production (PostgreSQL)**
-```bash
-# Update DATABASE_URL to PostgreSQL connection string
-DATABASE_URL="postgresql://username:password@host:port/database"
-pnpm db:generate  
-pnpm db:migrate
-```
-
-### 6. 🔧 Authentication Setup (Clerk)
-
-1. **Create Clerk Account**: [https://clerk.com](https://clerk.com)
-2. **Create Application** in Clerk Dashboard
-3. **Copy API Keys** to your `.env.local`
-4. **Configure Allowed Domains**:
-   - Development: `localhost:3000`, `localhost:3001`
-   - Production: Your actual domains
-
-### 7. 🚀 Development
+### 4. Validate Setup
 
 ```bash
-# Validate environment variables (recommended first step)
+# Check everything is configured correctly
 pnpm validate-env
-
-# Quick setup: validate env + generate database
-pnpm setup
-
-# Start all apps and packages in development mode
-pnpm dev
-
-# Run tests (requires dev servers to be running)
-pnpm test
-
-# Build for production
-pnpm build
-
-# Lint code
-pnpm lint
-
-# Type check
-pnpm typecheck
 ```
 
-## 📝 Development Workflow
+This will verify:
+- ✅ Environment variables are set
+- ✅ Appwrite project ID format
+- ✅ Database URL format
 
-1. **Feature Development**:
-   ```bash
-   git checkout -b feature/your-feature
-   pnpm dev  # Start development servers
-   # Make changes
-   pnpm test  # Run tests
-   pnpm lint  # Check code quality
-   ```
+### 5. Start Development
 
-2. **Testing**:
-   ```bash
-   # Terminal 1: Keep dev servers running
-   pnpm dev
-   
-   # Terminal 2: Run tests
-   pnpm test
-   ```
+```bash
+# Start all apps
+pnpm dev
+```
 
-3. **Deployment**:
-   ```bash
-   git push origin main  # Triggers CI/CD pipeline
-   ```
+**Your applications:**
+- **Web App**: http://localhost:3001 (main application)
+- **Admin App**: http://localhost:3000 (admin dashboard)
 
-## 🏗️ Infrastructure & Deployment
+## 🔧 Available Scripts
 
-For GCP deployment, Cloud Build setup, and infrastructure configuration, see:
+### Root Scripts
+- `pnpm dev` - Start all apps in development
+- `pnpm build` - Build all apps for production
+- `pnpm lint` - Lint all packages
+- `pnpm typecheck` - Type check all packages
+- `pnpm validate-env` - Validate environment setup
+- `pnpm setup:env` - Create environment files from template
 
-- **Infrastructure Documentation**: `infrastructure/README.md`
-- **Terraform Configurations**: `infrastructure/terraform/`
-- **Docker Configurations**: `Dockerfile` in each app
-- **CI/CD Pipeline**: `infrastructure/cloudbuild.yaml`
+### Database Scripts (Prisma in @repo/database package)
+- `pnpm db:generate` - Generate Prisma client
+- `pnpm db:push` - Push schema to database (development)
+- `pnpm db:migrate` - Create and apply migration (production)
+- `pnpm db:studio` - Open Prisma Studio
+- `pnpm db:seed` - Seed database with sample data
+- `pnpm db:reset` - Reset database (⚠️ destructive)
 
-## 🚨 **CHECKLIST: What to Update Before Going Live**
+### Adding Shadcn Components
+```bash
+# Navigate to UI package
+cd packages/ui
 
-- [ ] Update project name in root `package.json`
-- [ ] Update all `@repo/*` package names
-- [ ] Set up Clerk account and update auth keys
-- [ ] Configure production database connection string
-- [ ] Update environment variables for production
-- [ ] Follow infrastructure setup guide in `infrastructure/README.md`
-- [ ] Update app URLs in environment variables
-- [ ] Test deployment pipeline
-- [ ] Update domain names and SSL certificates
+# Add new components
+pnpm dlx shadcn@latest add input label form dialog
 
-## 📚 Additional Resources
+# Export in packages/ui/src/index.ts
+export * from './components/ui/input'
+export * from './components/ui/label'
+```
 
-- [Turborepo Documentation](https://turbo.build/repo/docs)
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Clerk Authentication](https://clerk.com/docs)
-- [Prisma Documentation](https://www.prisma.io/docs)
+## 🐳 Docker Development
 
-## 🆘 Troubleshooting
+### Database Only (Recommended)
+```bash
+# Start just PostgreSQL
+docker-compose up postgres -d
 
-### Common Issues:
+# View logs
+docker-compose logs -f postgres
 
-1. **Environment variables not loaded**: Ensure `.env.local` is in the root directory
-2. **Database connection failed**: Check `DATABASE_URL` format and credentials
-3. **Clerk authentication errors**: Verify API keys and allowed domains
-4. **Build failures**: Check TypeScript errors with `pnpm typecheck`
-5. **Tests failing**: Ensure dev servers are running before running tests
+# Stop
+docker-compose down
+```
 
-### Getting Help:
+### Full Stack with Docker
+```bash
+# Start everything (Postgres + Apps)
+docker-compose up
 
-- Check the specific app READMEs in `apps/web/README.md` and `apps/docs/README.md`
-- Review package documentation in `packages/*/README.md`
-- Check environment variable validation in `packages/env/src/`
-- Review infrastructure setup in `infrastructure/README.md`
+# Stop services
+docker-compose down
+
+# Reset database (removes data)
+docker-compose down -v
+```
+
+## 🚨 Troubleshooting
+
+### Common Issues
+
+**Environment not loading:**
+```bash
+# Recreate environment files
+pnpm setup:env
+# Edit .env.local with your Appwrite project ID
+pnpm validate-env
+```
+
+**Database connection failed:**
+```bash
+# Check Postgres is running
+docker-compose ps
+
+# Check connection
+docker-compose exec postgres psql -U app_user -d app_db -c "SELECT 1;"
+
+# If connection fails, restart Postgres
+docker-compose restart postgres
+```
+
+**Appwrite authentication issues:**
+```bash
+# Verify project ID (should be 20+ characters)
+echo $NEXT_PUBLIC_APPWRITE_PROJECT_ID
+
+# Test Appwrite connection
+curl https://cloud.appwrite.io/v1/health
+```
+
+**Database schema issues:**
+```bash
+# Reset and recreate database
+pnpm db:reset
+pnpm db:push
+```
+
+**Build failures:**
+```bash
+# Clear everything and reinstall
+docker-compose down
+rm -rf node_modules packages/*/node_modules apps/*/node_modules
+pnpm install
+pnpm db:generate
+pnpm build
+```
+
+### Complete Reset (Nuclear Option)
+```bash
+# Reset everything
+docker-compose down -v
+rm -rf node_modules packages/*/node_modules apps/*/node_modules
+rm .env.local packages/database/.env.local
+pnpm install
+pnpm setup:env
+# Edit .env.local with your Appwrite project ID
+docker-compose up postgres -d
+pnpm db:generate
+pnpm db:push
+pnpm validate-env
+pnpm dev
+```
+
+## 🌟 Features
+
+- **TypeScript** - Strict mode, no `any` types allowed
+- **Shadcn/ui** - Modern component library with Radix UI primitives
+- **Appwrite Auth** - Production-ready authentication with session management
+- **PostgreSQL** - Robust relational database with Prisma ORM
+- **Docker** - Containerized development environment
+- **Turborepo** - Optimized build system with intelligent caching
+- **Code Quality** - ESLint, Prettier, Husky pre-commit hooks
+- **GitHub Actions** - Automated CI/CD pipeline for Google Cloud
+
+## 🚀 Deployment
+
+For production deployment to Google Cloud Platform:
+
+1. **Infrastructure setup**: Follow `docs/GITHUB_DEPLOYMENT_SETUP.md`
+2. **Configure GitHub secrets**: Set up Workload Identity Federation
+3. **Push to main**: Triggers automatic deployment via GitHub Actions
+
+## 📖 Documentation
+
+- **Architecture Overview**: `docs/ARCHITECTURE.md`
+- **Coding Standards**: `docs/CODING_CONVENTIONS.md` 
+- **Deployment Guide**: `docs/GITHUB_DEPLOYMENT_SETUP.md`
+- **Path Aliases**: `docs/PATH_ALIASES.md`
+
+## 💡 Development Tips
+
+- **Start with validation**: Always run `pnpm validate-env` after changes
+- **Database first**: Ensure Postgres is running before starting apps
+- **Environment consistency**: DATABASE_URL must be the same in both `.env.local` files
+- **Component reuse**: Check `@repo/ui` before creating new components
+- **Clean commits**: Follow conventional commit format (see `docs/CODING_CONVENTIONS.md`)
+
+---
+
+**🎉 Happy coding!** For issues or questions, check the `docs/` folder or create an issue.

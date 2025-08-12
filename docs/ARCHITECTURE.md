@@ -125,19 +125,27 @@ export type { User, Session }
 - `types.ts`: Authentication type definitions
 
 #### `@repo/database`
-**Prisma-based database layer**
+**Prisma-based database layer with PostgreSQL**
 
 **Configuration**:
-- **ORM**: Prisma v5.22.0
-- **Development**: SQLite
-- **Production**: PostgreSQL
+- **ORM**: Prisma v6.12.0
+- **Database**: PostgreSQL (Docker for development)
 - **Schema**: Users and Posts with relationships
+- **Environment**: Requires `DATABASE_URL` in both root and package `.env.local`
+
+**Available Scripts**:
+- `pnpm db:generate` - Generate Prisma client
+- `pnpm db:push` - Push schema to database (development)
+- `pnpm db:migrate` - Create and apply migration (production)
+- `pnpm db:studio` - Open Prisma Studio
+- `pnpm db:seed` - Seed database with sample data
+- `pnpm db:reset` - Reset database (destructive)
 
 **Key Features**:
-- Automated client generation
-- Migration management
-- Database seeding
-- Studio for development
+- PostgreSQL-first approach (no SQLite conflicts)
+- Docker containerized development database
+- Type-safe database client generation
+- Migration management for production deployments
 
 #### `@repo/types`
 **Centralized TypeScript definitions**
@@ -348,13 +356,15 @@ Client → Appwrite → Server Action → Cookie → SSR
 
 ### Database Flow
 ```
-App → @repo/database → Prisma → PostgreSQL
+App → @repo/database → Prisma → Docker PostgreSQL
 ```
 
-1. Applications import database client
-2. Prisma provides type-safe queries
-3. Automatic connection pooling
-4. Migration management
+1. **Development Setup**: `docker-compose up postgres -d` starts PostgreSQL
+2. **Schema Generation**: `pnpm db:generate` creates type-safe Prisma client
+3. **Database Sync**: `pnpm db:push` applies schema to database
+4. **Applications**: Import database client from `@repo/database`
+5. **Type Safety**: Prisma provides compile-time query validation
+6. **Production**: Migrations managed via `pnpm db:migrate`
 
 ### UI Component Flow
 ```
@@ -397,16 +407,24 @@ apps/api → @repo/typescript-config
 - **Commitlint**: Conventional commit standards
 
 ### Developer Workflow
-1. **Setup**: `pnpm install` → environment validation → database generation
-2. **Development**: `pnpm dev` → all apps run concurrently with hot reload
-3. **Quality**: Automatic linting, formatting, and type checking
-4. **Testing**: Cypress E2E tests across applications
-5. **Build**: `pnpm build` → Turborepo orchestrates builds with caching
+1. **Initial Setup**: 
+   - `pnpm install` → Install dependencies
+   - `pnpm setup:env` → Create environment files
+   - Edit `.env.local` with Appwrite project ID
+2. **Database Setup**:
+   - `docker-compose up postgres -d` → Start PostgreSQL
+   - `pnpm db:generate` → Generate Prisma client
+   - `pnpm db:push` → Apply schema to database
+3. **Validation**: `pnpm validate-env` → Verify configuration
+4. **Development**: `pnpm dev` → Start all apps with hot reload
+5. **Quality**: Automatic linting, formatting, and type checking
+6. **Build**: `pnpm build` → Turborepo orchestrates builds with caching
 
 ### Environment Management
-- **Validation**: Custom script validates all required variables
-- **Type Safety**: Zod schemas ensure runtime type safety
-- **Multi-Environment**: Separate client/server environment handling
+- **Plug-and-Play Setup**: `pnpm setup:env` creates both environment files
+- **Simplified Configuration**: Only DATABASE_URL and Appwrite project ID required
+- **Validation Script**: Validates all required variables and formats
+- **PostgreSQL-First**: No SQLite conflicts, consistent schema across environments
 
 ## Security Architecture
 
