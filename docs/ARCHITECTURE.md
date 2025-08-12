@@ -190,21 +190,51 @@ enum UserRoleE { ADMIN = 'admin', USER = 'user' }
 ### UI & Utilities
 
 #### `@repo/ui`
-**Design system and reusable components**
+**Shadcn/ui-based design system and reusable components**
+
+**Component Library**:
+- **Framework**: Shadcn/ui components with Radix UI primitives
+- **Styling**: TailwindCSS v4 with CSS variables for theming
+- **Utilities**: `cn()` function for className merging (clsx + tailwind-merge)
+- **Variants**: Class Variance Authority (CVA) for component variants
+
+**Key Dependencies**:
+```json
+{
+  "@radix-ui/react-icons": "Icons library",
+  "@radix-ui/react-slot": "Composition primitives", 
+  "class-variance-authority": "Component variants",
+  "clsx": "Conditional classes",
+  "tailwind-merge": "Tailwind class merging"
+}
+```
 
 **Build System**:
 ```json
 {
-  "build": "pnpm build:components && pnpm build:styles",
   "build:components": "tsc",
   "build:styles": "tailwindcss -i ./src/styles.css -o ./dist/index.css"
 }
 ```
 
+**Available Components**:
+- **Button**: Multiple variants (default, destructive, outline, secondary, ghost, link)
+- **Card**: Complete card system (Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter)
+- **Utils**: `cn()` utility for className composition
+
+**Adding New Components**:
+```bash
+# Navigate to UI package
+cd packages/ui
+
+# Install additional Shadcn components
+pnpm dlx shadcn@latest add input label form dialog
+```
+
 **Exports**:
-- Component library
-- CSS bundle (`./styles.css`)
-- Utility functions
+- Shadcn/ui component library
+- CSS bundle with theme variables (`./styles.css`)
+- Utility functions (`cn`)
 
 #### `@repo/constants`
 **Application-wide constants**
@@ -328,13 +358,14 @@ App → @repo/database → Prisma → PostgreSQL
 
 ### UI Component Flow
 ```
-App → @repo/ui → TailwindCSS v4 → Styled Components
+App → @repo/ui → Shadcn/ui → Radix UI → TailwindCSS v4 → Styled Components
 ```
 
-1. Applications import UI components
-2. Shared design system ensures consistency
-3. TailwindCSS v4 provides styling
-4. PostCSS processes styles
+1. Applications import Shadcn/ui components from `@repo/ui`
+2. Shadcn components are built on Radix UI primitives for accessibility
+3. CSS variables enable easy theming and customization
+4. TailwindCSS v4 provides utility-first styling
+5. Component variants managed by Class Variance Authority (CVA)
 
 ## Package Dependencies
 
