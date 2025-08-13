@@ -13,6 +13,11 @@ database_password = "your-secure-database-password-here"
 appwrite_project_id = "your-appwrite-project-id-here"
 # appwrite_url = "https://cloud.appwrite.io/v1"  # Optional: defaults to Appwrite Cloud
 
+# GitHub Configuration (for Workload Identity Federation - auto-deployment)
+# REQUIRED: Replace with your actual GitHub repository information
+github_repository = "yourusername/your-repo-name"  # Format: "owner/repo"
+github_owner      = "yourusername"                 # Your GitHub username or org
+
 # Application URLs
 app_url = "https://your-app.com"
 api_url = "https://your-app.com/api"

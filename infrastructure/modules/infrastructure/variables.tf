@@ -37,6 +37,17 @@ variable "appwrite_url" {
   default     = "https://cloud.appwrite.io/v1"
 }
 
+# GitHub Configuration (for Workload Identity Federation)
+variable "github_repository" {
+  description = "GitHub repository in 'owner/repo' format for Workload Identity Federation"
+  type        = string
+}
+
+variable "github_owner" {
+  description = "GitHub repository owner (username or organization)"
+  type        = string
+}
+
 # Application URLs
 variable "app_url" {
   description = "Main application URL"

@@ -96,7 +96,38 @@ NODE_ENV="development"
    - Add Web platform: `http://localhost:3001`
    - Add Web platform: `http://localhost:3000`
 
-### 3. Database Setup (Docker PostgreSQL)
+### 3. GitHub Deployment Setup (Optional - for auto-deployment)
+
+If you want automatic deployment to Google Cloud Platform via GitHub Actions, add these variables to your **environment configuration**:
+
+**📋 Required Variables for Auto-Deployment:**
+
+Add these to your `infrastructure/terraform.tfvars` file:
+
+```bash
+# GitHub Repository (for Workload Identity Federation)
+# Format: "your-github-username/your-repo-name" 
+github_repository = "yourusername/your-repo-name"
+
+# GitHub Organization/User (for repository access)
+github_owner = "yourusername"
+```
+
+**💡 How to find your values:**
+- `github_repository`: Look at your GitHub URL: `https://github.com/USERNAME/REPO-NAME`
+- `github_owner`: Your GitHub username or organization name
+
+**🔧 These variables enable:**
+- ✅ Keyless authentication (no service account keys needed)
+- ✅ Automatic deployment on git push to main
+- ✅ Secure, repository-specific access to Google Cloud
+- ✅ Separate dev/prod environment isolation
+
+**📖 Full deployment guide**: `docs/GITHUB_DEPLOYMENT_SETUP.md`
+
+---
+
+### 4. Database Setup (Docker PostgreSQL)
 
 Start PostgreSQL:
 ```bash
@@ -273,13 +304,31 @@ pnpm dev
 - **Code Quality** - ESLint, Prettier, Husky pre-commit hooks
 - **GitHub Actions** - Automated CI/CD pipeline for Google Cloud
 
-## 🚀 Deployment
+## 🚀 Deployment (3-Command Setup)
 
-For production deployment to Google Cloud Platform:
+Deploy to Google Cloud Platform with **keyless authentication**:
 
-1. **Infrastructure setup**: Follow `docs/GITHUB_DEPLOYMENT_SETUP.md`
-2. **Configure GitHub secrets**: Set up Workload Identity Federation
-3. **Push to main**: Triggers automatic deployment via GitHub Actions
+```bash
+# 1. Add GitHub variables to infrastructure/terraform.tfvars
+#    (see "GitHub Deployment Setup" section above)
+
+# 2. Deploy infrastructure with auto-configured GitHub Actions
+cd infrastructure
+terraform init
+terraform apply
+
+# 3. Push to main branch - auto-deploys! 🚀
+git push origin main
+```
+
+**🔧 What happens automatically:**
+- ✅ Google Cloud infrastructure provisioned
+- ✅ Workload Identity Federation configured (no service account keys!)
+- ✅ GitHub repository secrets automatically set
+- ✅ Push to `main` → deploys to production
+- ✅ Push to `dev` → deploys to development environment
+
+**📖 Full setup guide**: `docs/GITHUB_DEPLOYMENT_SETUP.md`
 
 ## 📖 Documentation
 
