@@ -9,13 +9,9 @@ environment = "dev"
 # Database Configuration (generate a strong password)
 database_password = "your-secure-database-password-here"
 
-# Clerk Authentication (get from https://dashboard.clerk.com)
-clerk_secret_key      = "sk_test_your_clerk_secret_key_here"
-clerk_publishable_key = "pk_test_your_clerk_publishable_key_here"
-clerk_webhook_secret  = "whsec_your_webhook_secret_here"
-
-# JWT Configuration (generate a random 32+ character string)
-jwt_secret = "your-super-secret-jwt-key-at-least-32-characters-long"
+# Appwrite Authentication (get from https://cloud.appwrite.io/console)
+appwrite_project_id = "your-appwrite-project-id-here"
+# appwrite_url = "https://cloud.appwrite.io/v1"  # Optional: defaults to Appwrite Cloud
 
 # Application URLs
 app_url = "https://your-app.com"
