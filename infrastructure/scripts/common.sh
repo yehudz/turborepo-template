@@ -404,10 +404,17 @@ configure_github_variables() {
     local service_account=$(terraform output -raw service_account_email 2>/dev/null)
     local project_id=$(terraform output -raw project_id 2>/dev/null)
     local environment=$(terraform output -raw environment 2>/dev/null)
+    local region=$(terraform output -raw region 2>/dev/null)
     
     if [ -z "$wif_provider" ] || [ -z "$service_account" ]; then
         log_error "Could not get Terraform outputs. Make sure infrastructure is deployed."
         exit 1
+    fi
+    
+    # Set default region if not available from Terraform
+    if [ -z "$region" ]; then
+        region="us-central1"
+        log_warning "Region not found in Terraform outputs, using default: $region"
     fi
     
     # Set GitHub repository variables
@@ -422,6 +429,12 @@ configure_github_variables() {
     
     echo "  Setting ENVIRONMENT..."
     gh variable set ENVIRONMENT --body "$environment" --repo "$github_owner/$github_repo"
+    
+    echo "  Setting REGION..."
+    gh variable set REGION --body "$region" --repo "$github_owner/$github_repo"
+    
+    echo "  Setting ARTIFACT_REGISTRY_REPO..."
+    gh variable set ARTIFACT_REGISTRY_REPO --body "turborepo-images" --repo "$github_owner/$github_repo"
     
     log_success "GitHub repository variables configured"
 }

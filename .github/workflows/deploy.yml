@@ -1,20 +1,53 @@
-name: Deploy
+name: Deploy Application
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch: # Allow manual deployment
+  workflow_dispatch: # Manual deployment only
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+      confirm_deployment:
+        description: 'Type "DEPLOY" to confirm'
+        required: true
+        type: string
 
-# Prevent concurrent deployments
+# Prevent concurrent deployments per environment
 concurrency:
-  group: deploy-${{ github.ref }}
+  group: deploy-${{ inputs.environment }}
   cancel-in-progress: false
 
 jobs:
+  validate-deployment:
+    name: Validate Deployment Request
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Validate confirmation
+        run: |
+          if [ "${{ inputs.confirm_deployment }}" != "DEPLOY" ]; then
+            echo "❌ Deployment cancelled: confirmation must be exactly 'DEPLOY'"
+            echo "You entered: '${{ inputs.confirm_deployment }}'"
+            exit 1
+          fi
+          echo "✅ Deployment confirmation validated"
+          
+      - name: Show deployment info
+        run: |
+          echo "🚀 Deploying to: ${{ inputs.environment }}"
+          echo "📦 Commit: ${{ github.sha }}"
+          echo "👤 Triggered by: ${{ github.actor }}"
+          echo "🌿 Branch: ${{ github.ref_name }}"
+
   build-and-deploy:
-    name: Build and Deploy to Cloud Run
+    name: Deploy to ${{ inputs.environment }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    needs: validate-deployment
+    environment: ${{ inputs.environment }}
 
     # Required permissions for workload identity
     permissions:
@@ -51,8 +84,8 @@ jobs:
         id: auth
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
-          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.WIF_SERVICE_ACCOUNT }}
 
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
@@ -128,31 +161,47 @@ jobs:
           
           echo "IMAGE_URL=$IMAGE_URL" >> $GITHUB_ENV
 
+      - name: Set environment-specific config
+        run: |
+          # Set resource limits based on environment
+          if [ "${{ inputs.environment }}" = "prod" ]; then
+            echo "MIN_INSTANCES=1" >> $GITHUB_ENV
+            echo "MAX_INSTANCES=100" >> $GITHUB_ENV
+            echo "MEMORY=2Gi" >> $GITHUB_ENV
+            echo "CPU=2" >> $GITHUB_ENV
+            echo "SERVICE_NAME=web-app" >> $GITHUB_ENV
+          else
+            echo "MIN_INSTANCES=0" >> $GITHUB_ENV
+            echo "MAX_INSTANCES=10" >> $GITHUB_ENV
+            echo "MEMORY=512Mi" >> $GITHUB_ENV
+            echo "CPU=1" >> $GITHUB_ENV
+            echo "SERVICE_NAME=web-app-dev" >> $GITHUB_ENV
+          fi
+          
       - name: Deploy to Cloud Run
         run: |
-          gcloud run deploy web-app \
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
             --image ${{ env.IMAGE_URL }} \
             --region ${{ vars.REGION }} \
             --platform managed \
             --allow-unauthenticated \
             --port 3000 \
-            --memory 512Mi \
-            --cpu 1 \
-            --min-instances 0 \
-            --max-instances 10 \
-            --vpc-connector ${{ vars.VPC_CONNECTOR }} \
-            --set-env-vars NODE_ENV=production \
+            --memory ${{ env.MEMORY }} \
+            --cpu ${{ env.CPU }} \
+            --min-instances ${{ env.MIN_INSTANCES }} \
+            --max-instances ${{ env.MAX_INSTANCES }} \
+            --set-env-vars NODE_ENV=${{ inputs.environment }} \
+            --set-env-vars ENVIRONMENT=${{ inputs.environment }} \
             --set-secrets DATABASE_URL=DATABASE_URL:latest \
-            --set-secrets CLERK_SECRET_KEY=CLERK_SECRET_KEY:latest \
-            --set-secrets CLERK_WEBHOOK_SECRET=CLERK_WEBHOOK_SECRET:latest \
-            --set-secrets JWT_SECRET=JWT_SECRET:latest \
-            --set-secrets NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:latest \
-            --set-secrets NEXT_PUBLIC_APP_URL=NEXT_PUBLIC_APP_URL:latest \
-            --set-secrets NEXT_PUBLIC_API_URL=NEXT_PUBLIC_API_URL:latest \
+            --set-secrets NEXT_PUBLIC_APPWRITE_PROJECT_ID=NEXT_PUBLIC_APPWRITE_PROJECT_ID:latest \
+            --set-secrets NEXT_PUBLIC_APPWRITE_URL=NEXT_PUBLIC_APPWRITE_URL:latest \
             --set-secrets GOOGLE_CLOUD_BUCKET_NAME=GOOGLE_CLOUD_BUCKET_NAME:latest
 
       - name: Get service URL
         run: |
-          SERVICE_URL=$(gcloud run services describe web-app --region ${{ vars.REGION }} --format 'value(status.url)')
-          echo "Deployed to: $SERVICE_URL"
+          SERVICE_URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} --region ${{ vars.REGION }} --format 'value(status.url)')
+          echo "🚀 Successfully deployed to ${{ inputs.environment }}"
+          echo "📍 Service URL: $SERVICE_URL"
+          echo "🏷️  Service Name: ${{ env.SERVICE_NAME }}"
+          echo "💾 Image: ${{ env.IMAGE_URL }}"
           echo "SERVICE_URL=$SERVICE_URL" >> $GITHUB_OUTPUT
