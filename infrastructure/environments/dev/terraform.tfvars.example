@@ -1,0 +1,30 @@
+# Development Environment Configuration
+# Copy this file to terraform.tfvars and enter your actual values
+
+# ===== REQUIRED: Your GCP Project =====
+project_id = "your-project-dev-123"  # Your actual GCP project ID for development
+
+# ===== REQUIRED: Your GitHub Repository =====
+github_owner      = "your-username"     # Your GitHub username or organization
+github_repository = "your-repo-name"    # Your repository name (without owner)
+
+# ===== REQUIRED: Appwrite Configuration =====
+appwrite_project_id = "507f1f77bcf86cd799439011"  # Your Appwrite project ID
+appwrite_url       = "https://cloud.appwrite.io/v1"  # Appwrite endpoint (usually this default)
+
+# ===== OPTIONAL: Customization =====
+region   = "us-central1"      # GCP region (optional, defaults to us-central1)
+app_name = "my-awesome-app"   # App name for resource naming (optional, defaults to turborepo-app)
+
+# ===== OPTIONAL: Additional Repositories =====
+# If you have other repos that should be able to deploy to dev environment
+additional_repositories = [
+  # "your-username/another-repo",
+  # "your-org/shared-tools"
+]
+
+# ===== EXAMPLE VALUES (REPLACE WITH YOUR ACTUAL VALUES) =====
+# project_id = "my-startup-dev-2024"
+# github_owner = "john-doe"  
+# github_repository = "my-saas-app"
+# appwrite_project_id = "507f191e810c19729de860ea"
