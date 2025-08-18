@@ -28,11 +28,8 @@ services:
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://app_user:dev_password@postgres:5432/app_db
-      - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_placeholder
-      - CLERK_SECRET_KEY=sk_test_placeholder
-      - JWT_SECRET=your-jwt-secret-for-development-32-chars
-      - NEXT_PUBLIC_APP_URL=http://localhost:3001
-      - NEXT_PUBLIC_API_URL=http://localhost:3001/api
+      - NEXT_PUBLIC_APPWRITE_PROJECT_ID=your_project_id_here
+      - NEXT_PUBLIC_APPWRITE_URL=https://cloud.appwrite.io/v1
     ports:
       - "3001:3000"
     depends_on:
@@ -53,7 +50,6 @@ services:
     container_name: turborepo-docs
     environment:
       - NODE_ENV=development
-      - NEXT_PUBLIC_APP_URL=http://localhost:3000
     ports:
       - "3000:3000"
     volumes:

@@ -1,198 +1,596 @@
-# Turborepo Template with TypeScript, Tailwind CSS, Clerk Auth & Prisma
+# 🚀 Enterprise Turborepo Template
 
-A production-ready turborepo template with authentication, database, and CI/CD setup for Google Cloud Platform (GCP).
+**The complete full-stack template for modern web applications.** From local development to production deployment in 15 minutes.
 
-## 🚀 What's Inside
+✅ **Next.js 15** + **React 19** + **TypeScript**  
+✅ **Shadcn/ui** design system + **Tailwind CSS v4**  
+✅ **Appwrite authentication** + **PostgreSQL database**  
+✅ **Google Cloud deployment** with **manual CI/CD approval**  
+✅ **Complete automation** - one-command setup  
 
-This template includes:
+---
 
-- **Apps:**
-  - `web` - Next.js 15 app with Clerk authentication
-  - `docs` - Next.js 15 documentation app
-- **Packages:**
-  - `@repo/ui` - Shared React components with Tailwind CSS
-  - `@repo/auth` - Clerk authentication configuration
-  - `@repo/database` - Prisma ORM with PostgreSQL
-  - `@repo/env` - Environment variable validation
-  - `@repo/types` - Shared TypeScript types
-  - `@repo/constants` - Shared constants
-  - `@repo/cypress-e2e` - End-to-end testing
+## 🎯 Complete Setup Guide
 
-## 📋 Prerequisites
+Follow these **exact steps** to go from zero to deployed enterprise application.
 
-- Node.js 18+ 
-- pnpm 8+
-- Docker (for database)
-- Google Cloud CLI (for deployment)
+### Prerequisites
 
-## 🛠️ Setup Instructions
+**Install these first (5 minutes):**
 
-### 1. Clone and Install
+1. **Docker Desktop** (for local database):
+   ```bash
+   # Download and install from:
+   open https://docker.com/desktop
+   ```
 
+2. **Node.js 20**:
+   ```bash
+   # Download and install from:
+   open https://nodejs.org
+   ```
+
+3. **pnpm** (package manager):
+   ```bash
+   npm install -g pnpm
+   ```
+
+4. **Git** (should be installed):
+   ```bash
+   git --version
+   ```
+
+---
+
+## Part 1: Authentication Setup (Appwrite)
+
+**Create your authentication backend (3 minutes):**
+
+1. **Create Appwrite account:**
+   ```bash
+   # Open Appwrite console:
+   open https://cloud.appwrite.io
+   ```
+   - Click "Sign Up" and create free account
+   - Verify your email
+
+2. **Create new project:**
+   - Click "Create Project"
+   - Name: `My Enterprise App` (or your app name)
+   - Click "Create"
+   - **📋 COPY the Project ID** (looks like: `507f1f77bcf86cd799439011`)
+
+3. **Configure authentication:**
+   - In Appwrite Console → **Authentication** → **Settings**
+   - **Enable** Email/Password authentication
+   - **Save** settings
+
+4. **Authentication is ready:**
+   - ✅ **No additional platform configuration needed**
+   - Modern Appwrite automatically handles local development domains
+   - Your authentication backend is ready to use
+
+**✅ Keep your Project ID handy - you'll need it in the next step!**
+
+---
+
+## Part 2: Local Development Setup
+
+**Set up your development environment (5 minutes):**
+
+1. **Clone repository:**
+   ```bash
+   git clone https://github.com/your-username/your-repo-name.git
+   cd your-repo-name
+   ```
+
+2. **Create environment file:**
+   ```bash
+   cp .env.example .env.local
+   ```
+
+3. **Edit environment file:**
+   ```bash
+   # Open in VS Code:
+   code .env.local
+   
+   # OR open in nano:
+   nano .env.local
+   ```
+   
+   **📝 Edit these lines exactly:**
+   - **Line 3:** `DATABASE_URL="postgresql://app_user:dev_password@localhost:5432/app_db"`
+   - **Line 7:** `NEXT_PUBLIC_APPWRITE_PROJECT_ID="your-project-id-from-step-1"`
+   - **Line 8:** `NEXT_PUBLIC_APPWRITE_URL="https://cloud.appwrite.io/v1"`
+   
+   **Save and close the file.**
+
+4. **Start local database:**
+   ```bash
+   docker-compose up postgres -d
+   ```
+   
+   **Wait for:** `database system is ready to accept connections`
+
+5. **Install dependencies:**
+   ```bash
+   pnpm install
+   ```
+
+6. **Setup database:**
+   ```bash
+   pnpm db:generate
+   pnpm db:push
+   ```
+
+7. **Validate setup:**
+   ```bash
+   pnpm validate-env
+   ```
+   
+   **You should see:** `✅ Environment validation passed!`
+
+8. **Start development servers:**
+   ```bash
+   pnpm dev
+   ```
+
+9. **Open your applications:**
+   - **Web app:** http://localhost:3001
+   - **Admin app:** http://localhost:3000
+
+**🎉 Local development is now running!**
+
+---
+
+## Part 3: Development Workflow
+
+**How to develop and test locally:**
+
+### Daily Development
+
+1. **Start development (if not running):**
+   ```bash
+   pnpm dev
+   ```
+
+2. **Make your changes** in VS Code or your editor
+
+3. **Create feature branch:**
+   ```bash
+   git checkout -b feature/my-awesome-feature
+   ```
+
+4. **Test your changes** at http://localhost:3001
+
+5. **Commit changes:**
+   ```bash
+   git add .
+   git commit -m "feat: add awesome new feature"
+   ```
+
+6. **Push to GitHub:**
+   ```bash
+   git push origin feature/my-awesome-feature
+   ```
+
+7. **Create Pull Request** on GitHub
+
+8. **After PR approval, merge to main**
+
+**✅ CI runs automatically on every PR (lint, typecheck, build)**
+
+---
+
+## Part 4: Production Infrastructure Setup
+
+**Deploy to Google Cloud Platform (5 minutes):**
+
+### Prerequisites for Production
+
+1. **Google Cloud account:**
+   ```bash
+   # Create account at:
+   open https://cloud.google.com
+   ```
+
+2. **Install Google Cloud CLI:**
+   ```bash
+   # Download from:
+   open https://cloud.google.com/sdk/docs/install
+   ```
+
+3. **Install GitHub CLI:**
+   ```bash
+   # Download from:
+   open https://cli.github.com
+   ```
+
+4. **Authenticate with Google Cloud:**
+   ```bash
+   gcloud auth login
+   ```
+
+5. **Authenticate with GitHub:**
+   ```bash
+   gh auth login
+   ```
+
+### Development Environment Setup
+
+1. **Navigate to dev environment:**
+   ```bash
+   cd infrastructure/environments/dev
+   ```
+
+2. **Copy terraform template:**
+   ```bash
+   cp terraform.tfvars.example terraform.tfvars
+   ```
+
+3. **Edit terraform variables:**
+   ```bash
+   code terraform.tfvars
+   ```
+   
+   **📝 Edit these lines:**
+   - **Line 8:** `project_id = "my-startup-dev-2024"` (your GCP project ID)
+   - **Line 12:** `github_owner = "your-github-username"`
+   - **Line 13:** `github_repository = "your-repo-name"`
+   - **Line 16:** `appwrite_project_id = "your-appwrite-project-id-from-part-1"`
+   
+   **Save and close the file.**
+
+4. **Return to project root:**
+   ```bash
+   cd ../../..
+   ```
+
+5. **Run automated setup:**
+   ```bash
+   ./infrastructure/scripts/setup-dev.sh
+   ```
+   
+   **Follow the prompts:**
+   - When asked for GCP Project ID: `my-startup-dev-2024`
+   - When asked for Appwrite Project ID: `your-appwrite-project-id`
+   - Type `y` to confirm deployment
+   
+   **Wait for:** `✅ Dev environment ready!`
+
+**🎉 Your development infrastructure is deployed!**
+
+### Production Environment Setup (Optional)
+
+1. **Navigate to prod environment:**
+   ```bash
+   cd infrastructure/environments/prod
+   ```
+
+2. **Copy terraform template:**
+   ```bash
+   cp terraform.tfvars.example terraform.tfvars
+   ```
+
+3. **Edit terraform variables:**
+   ```bash
+   code terraform.tfvars
+   ```
+   
+   **📝 Edit these lines:**
+   - **Line 8:** `project_id = "my-startup-prod-2024"` (separate production project)
+   - **Line 12:** `github_owner = "your-github-username"`
+   - **Line 13:** `github_repository = "your-repo-name"`
+   - **Line 16:** `appwrite_project_id = "your-prod-appwrite-project-id"` (separate production Appwrite)
+   - **Line 20:** `alert_email = "alerts@yourcompany.com"` (for production monitoring)
+   
+   **Save and close the file.**
+
+4. **Return to project root:**
+   ```bash
+   cd ../../..
+   ```
+
+5. **Run production setup:**
+   ```bash
+   ./infrastructure/scripts/setup-prod.sh
+   ```
+   
+   **Follow the production warnings and confirmations**
+   
+   **Wait for:** `✅ Production environment ready!`
+
+---
+
+## Part 5: Deploy Your Application
+
+**Manual deployment with approval (enterprise-grade):**
+
+### Deploy to Development
+
+1. **Go to GitHub Actions:**
+   ```bash
+   # Open your repository:
+   open https://github.com/your-username/your-repo-name/actions
+   ```
+
+2. **Start deployment:**
+   - Click **"Deploy Application"** workflow
+   - Click **"Run workflow"** button
+   - Select **"dev"** from Environment dropdown
+   - Type **"DEPLOY"** in confirmation field (exactly like that)
+   - Click **"Run workflow"**
+
+3. **Monitor deployment:**
+   - Watch the workflow progress
+   - Wait for green ✅ checkmark
+   - Click on the run to see deployment URL
+
+4. **Access your deployed app:**
+   - Copy the URL from the deployment logs
+   - Your app is live! 🎉
+
+### Deploy to Production
+
+1. **Same process as dev, but:**
+   - Select **"prod"** from Environment dropdown
+   - **Extra confirmations** will be required
+   - **Production resources** will be used (higher cost)
+
+2. **Production features:**
+   - Always-warm instances (no cold starts)
+   - Higher memory and CPU allocation
+   - Automated backups
+   - Email monitoring alerts
+
+---
+
+## Part 6: Complete Workflow Summary
+
+**Your enterprise development workflow:**
+
+### Local Development
 ```bash
-git clone <your-repo-url>
-cd <your-project-name>
+# Daily development
+pnpm dev                    # Start local development
+# Make changes, test at localhost:3001
+git checkout -b feature/x   # Create feature branch
+git push origin feature/x   # Push changes
+# Create PR on GitHub → CI runs automatically
+```
+
+### Manual Deployment
+```bash
+# After PR merged to main:
+# 1. Go to GitHub → Actions
+# 2. Click "Deploy Application"
+# 3. Select environment (dev/prod)
+# 4. Type "DEPLOY"
+# 5. Click "Run workflow"
+```
+
+### No Automatic Deployments
+- ✅ **Merging to main** = NO deployment (safe)
+- ✅ **Manual approval** required for all deployments
+- ✅ **Environment selection** (dev vs prod)
+- ✅ **Professional workflow** for enterprise teams
+
+---
+
+## 🔧 Available Commands
+
+### Development Commands
+```bash
+pnpm dev                 # Start all apps in development
+pnpm build              # Build all apps for production
+pnpm lint               # Lint all packages
+pnpm typecheck          # Type check all packages
+pnpm validate-env       # Validate environment setup
+```
+
+### Database Commands
+```bash
+pnpm db:generate        # Generate Prisma client
+pnpm db:push           # Push schema to database (development)
+pnpm db:migrate        # Create and apply migration (production)
+pnpm db:studio         # Open Prisma Studio (database UI)
+pnpm db:seed           # Seed database with sample data
+pnpm db:reset          # Reset database (⚠️ destructive)
+```
+
+### Infrastructure Commands
+```bash
+./infrastructure/scripts/setup-dev.sh    # Setup development environment
+./infrastructure/scripts/setup-prod.sh   # Setup production environment
+./infrastructure/scripts/validate-scripts.sh  # Test scripts without deployment
+```
+
+### Docker Commands
+```bash
+docker-compose up postgres -d    # Start database only
+docker-compose up               # Start all services
+docker-compose down             # Stop all services
+docker-compose logs postgres    # View database logs
+```
+
+---
+
+## 📋 What's Inside This Template
+
+### Applications
+- **`apps/web`** - Main user-facing Next.js app (port 3001)
+- **`apps/admin`** - Administrative dashboard (port 3000)
+- **`apps/api`** - Express.js API server
+
+### Shared Packages
+- **`@repo/ui`** - Shadcn/ui components with Tailwind CSS v4
+- **`@repo/auth`** - Appwrite authentication (client + server)
+- **`@repo/database`** - Prisma ORM with PostgreSQL
+- **`@repo/env`** - Environment variable validation
+- **`@repo/types`** - Shared TypeScript types
+- **`@repo/constants`** - Application constants
+
+### Infrastructure
+- **Google Cloud Run** - Application hosting
+- **Google Cloud SQL** - PostgreSQL database
+- **Google Secret Manager** - Secure secret storage
+- **Workload Identity Federation** - Keyless authentication
+- **Artifact Registry** - Docker image storage
+
+### CI/CD Features
+- **Manual approval** workflow (no automatic deployments)
+- **Environment selection** (dev/prod)
+- **Automated testing** (lint, typecheck, build)
+- **Security scanning** and dependency auditing
+- **Environment isolation** with different resource configurations
+
+---
+
+## 🚨 Troubleshooting
+
+### Local Development Issues
+
+**Environment variables not loading:**
+```bash
+# Recreate environment file
+cp .env.example .env.local
+code .env.local
+# Add your Appwrite project ID and save
+pnpm validate-env
+```
+
+**Database connection failed:**
+```bash
+# Check if Docker is running
+docker --version
+
+# Check if Postgres is running
+docker-compose ps
+
+# Restart Postgres
+docker-compose down
+docker-compose up postgres -d
+
+# Check logs
+docker-compose logs postgres
+```
+
+**Appwrite authentication not working:**
+```bash
+# Verify your project ID in .env.local
+cat .env.local | grep APPWRITE
+
+# Check Appwrite console domains:
+# Settings → Platforms → Web platforms should include:
+# - http://localhost:3001
+# - http://localhost:3000
+```
+
+**pnpm install fails:**
+```bash
+# Clear cache and reinstall
+rm -rf node_modules
+rm pnpm-lock.yaml
 pnpm install
 ```
 
-### 2. 🔐 Create Environment File
+### Deployment Issues
 
+**GCP authentication failed:**
 ```bash
-# REQUIRED: Copy template and add your actual values
-cp .env.example .env.local
+# Re-authenticate
+gcloud auth login
+gcloud config set project your-project-id
+
+# Check active account
+gcloud auth list
 ```
 
-**Then open `.env.local` and replace the placeholder values with real ones (see step 3 below).**
-
-### 3. ⚠️ **CRITICAL**: Update Package Names
-
-**You MUST update these before starting development:**
-
-1. **Root package.json** - Change project name:
-```json
-{
-  "name": "your-project-name"  // Change from "with-tailwind"
-}
-```
-
-2. **Update workspace package names** in each `package.json`:
+**GitHub CLI not working:**
 ```bash
-# Find all package.json files and update @repo/* names
-packages/*/package.json
-apps/*/package.json
+# Re-authenticate
+gh auth login
+gh auth status
+
+# Check repository access
+gh repo view your-username/your-repo-name
 ```
 
-### 4. 🔐 Environment Variables Setup
-
-#### **🚨 MUST UPDATE - Environment Variables**
-
-| Variable | Location | Description | How to Get |
-|----------|----------|-------------|------------|
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | `.env.local` | Clerk auth public key | [Clerk Dashboard](https://dashboard.clerk.com) → Your App → API Keys |
-| `CLERK_SECRET_KEY` | `.env.local` | Clerk auth secret key | [Clerk Dashboard](https://dashboard.clerk.com) → Your App → API Keys |
-| `DATABASE_URL` | `.env.local` | PostgreSQL connection string | See Database Setup below |
-| `NEXT_PUBLIC_APP_URL` | `.env.local` | Your app URL | `http://localhost:3000` (dev) or your domain |
-| `NEXT_PUBLIC_API_URL` | `.env.local` | Your API URL | `http://localhost:3000/api` (dev) or your API domain |
-| `JWT_SECRET` | `.env.local` | JWT signing secret | Generate: `openssl rand -base64 32` |
-
-### 5. 🗃️ Database Setup
-
-#### **Local Development (SQLite)**
+**Terraform deployment failed:**
 ```bash
-# Uses file-based SQLite (default)
-DATABASE_URL="file:./dev.db"
-pnpm db:generate
-pnpm db:push
+# Check if you're in the right directory
+pwd
+# Should be: /path/to/your-project/infrastructure/environments/dev
+
+# Check terraform.tfvars values
+cat terraform.tfvars
+
+# Re-run setup
+./../../scripts/setup-dev.sh
 ```
 
-#### **Production (PostgreSQL)**
+**GitHub Actions workflow failed:**
 ```bash
-# Update DATABASE_URL to PostgreSQL connection string
-DATABASE_URL="postgresql://username:password@host:port/database"
-pnpm db:generate  
-pnpm db:migrate
+# Check if repository variables are set:
+# GitHub → Settings → Secrets and variables → Actions → Variables
+
+# Required variables:
+# - WIF_PROVIDER
+# - WIF_SERVICE_ACCOUNT  
+# - PROJECT_ID
+# - REGION
+# - ARTIFACT_REGISTRY_REPO
+
+# These should be set automatically by setup scripts
 ```
 
-### 6. 🔧 Authentication Setup (Clerk)
+### Common Error Messages
 
-1. **Create Clerk Account**: [https://clerk.com](https://clerk.com)
-2. **Create Application** in Clerk Dashboard
-3. **Copy API Keys** to your `.env.local`
-4. **Configure Allowed Domains**:
-   - Development: `localhost:3000`, `localhost:3001`
-   - Production: Your actual domains
+**"Project ID must be 6-30 characters":**
+- Use only lowercase letters, numbers, and hyphens
+- Start with a letter
+- Example: `my-startup-dev-2024`
 
-### 7. 🚀 Development
+**"Appwrite Project ID must be 24 characters":**
+- Copy the exact Project ID from Appwrite Console
+- Should look like: `507f1f77bcf86cd799439011`
 
+**"Docker compose command not found":**
 ```bash
-# Validate environment variables (recommended first step)
-pnpm validate-env
-
-# Quick setup: validate env + generate database
-pnpm setup
-
-# Start all apps and packages in development mode
-pnpm dev
-
-# Run tests (requires dev servers to be running)
-pnpm test
-
-# Build for production
-pnpm build
-
-# Lint code
-pnpm lint
-
-# Type check
-pnpm typecheck
+# Install Docker Desktop from https://docker.com/desktop
+# Make sure Docker is running (check system tray)
 ```
 
-## 📝 Development Workflow
+**"Permission denied" on scripts:**
+```bash
+# Make scripts executable
+chmod +x infrastructure/scripts/*.sh
+```
 
-1. **Feature Development**:
-   ```bash
-   git checkout -b feature/your-feature
-   pnpm dev  # Start development servers
-   # Make changes
-   pnpm test  # Run tests
-   pnpm lint  # Check code quality
-   ```
+---
 
-2. **Testing**:
-   ```bash
-   # Terminal 1: Keep dev servers running
-   pnpm dev
-   
-   # Terminal 2: Run tests
-   pnpm test
-   ```
+## 📖 Additional Documentation
 
-3. **Deployment**:
-   ```bash
-   git push origin main  # Triggers CI/CD pipeline
-   ```
+- **`docs/ARCHITECTURE.md`** - Complete system architecture
+- **`docs/CODING_CONVENTIONS.md`** - Code style and conventions
+- **`docs/GITHUB_DEPLOYMENT_SETUP.md`** - Detailed deployment guide
+- **`docs/PATH_ALIASES.md`** - Import path configuration
 
-## 🏗️ Infrastructure & Deployment
+---
 
-For GCP deployment, Cloud Build setup, and infrastructure configuration, see:
+## 🎯 Enterprise Features
 
-- **Infrastructure Documentation**: `infrastructure/README.md`
-- **Terraform Configurations**: `infrastructure/terraform/`
-- **Docker Configurations**: `Dockerfile` in each app
-- **CI/CD Pipeline**: `infrastructure/cloudbuild.yaml`
+✅ **Type Safety** - Strict TypeScript with no `any` types  
+✅ **Code Quality** - ESLint, Prettier, automated checks  
+✅ **Security** - Workload Identity Federation, Secret Manager  
+✅ **Scalability** - Monorepo architecture, shared packages  
+✅ **Monitoring** - Production alerts and logging  
+✅ **Cost Optimization** - Environment-specific resource allocation  
+✅ **Developer Experience** - Hot reload, automated setup  
+✅ **Professional CI/CD** - Manual approvals, environment isolation  
 
-## 🚨 **CHECKLIST: What to Update Before Going Live**
+**Built for teams. Ready for production. Enterprise-grade from day one.** 🚀
 
-- [ ] Update project name in root `package.json`
-- [ ] Update all `@repo/*` package names
-- [ ] Set up Clerk account and update auth keys
-- [ ] Configure production database connection string
-- [ ] Update environment variables for production
-- [ ] Follow infrastructure setup guide in `infrastructure/README.md`
-- [ ] Update app URLs in environment variables
-- [ ] Test deployment pipeline
-- [ ] Update domain names and SSL certificates
+---
 
-## 📚 Additional Resources
-
-- [Turborepo Documentation](https://turbo.build/repo/docs)
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Clerk Authentication](https://clerk.com/docs)
-- [Prisma Documentation](https://www.prisma.io/docs)
-
-## 🆘 Troubleshooting
-
-### Common Issues:
-
-1. **Environment variables not loaded**: Ensure `.env.local` is in the root directory
-2. **Database connection failed**: Check `DATABASE_URL` format and credentials
-3. **Clerk authentication errors**: Verify API keys and allowed domains
-4. **Build failures**: Check TypeScript errors with `pnpm typecheck`
-5. **Tests failing**: Ensure dev servers are running before running tests
-
-### Getting Help:
-
-- Check the specific app READMEs in `apps/web/README.md` and `apps/docs/README.md`
-- Review package documentation in `packages/*/README.md`
-- Check environment variable validation in `packages/env/src/`
-- Review infrastructure setup in `infrastructure/README.md`
+*Need help? Check the troubleshooting section above or open an issue on GitHub.*

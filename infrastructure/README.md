@@ -49,9 +49,8 @@ Edit `terraform.tfvars` with your actual values:
 
 - `project_id`: Your GCP project ID
 - `database_password`: Strong password for PostgreSQL
-- `clerk_secret_key`: From [Clerk Dashboard](https://dashboard.clerk.com)
-- `clerk_publishable_key`: From Clerk Dashboard
-- `jwt_secret`: Random 32+ character string
+- `appwrite_project_id`: From [Appwrite Console](https://cloud.appwrite.io/console)
+- `appwrite_url`: Appwrite API endpoint (defaults to Appwrite Cloud)
 - `app_url` and `api_url`: Your application URLs
 
 ### 2. Initialize Terraform

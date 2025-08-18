@@ -29,12 +29,8 @@ Go to **Settings → Secrets and variables → Actions → Secrets tab** and add
 | Secret Name | Description | Example |
 |-------------|-------------|---------|
 | `DATABASE_URL` | Production database URL | `postgresql://user:pass@host/db` |
-| `CLERK_SECRET_KEY` | Clerk production secret | `sk_live_...` |
-| `CLERK_WEBHOOK_SECRET` | Clerk webhook secret | `whsec_...` |
-| `JWT_SECRET` | JWT signing secret | `your-production-jwt-secret` |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk public key | `pk_live_...` |
-| `NEXT_PUBLIC_APP_URL` | Production app URL | `https://yourapp.run.app` |
-| `NEXT_PUBLIC_API_URL` | Production API URL | `https://yourapp.run.app/api` |
+| `NEXT_PUBLIC_APPWRITE_PROJECT_ID` | Appwrite project ID | `507f1f77bcf86cd799439011` |
+| `NEXT_PUBLIC_APPWRITE_URL` | Appwrite endpoint | `https://cloud.appwrite.io/v1` |
 | `GOOGLE_CLOUD_BUCKET_NAME` | GCS bucket name | `my-app-uploads` |
 
 ## 🏗️ GCP Infrastructure Setup
@@ -124,12 +120,8 @@ gcloud projects add-iam-policy-binding YOUR-PROJECT-ID \
 ```bash
 # Store application secrets
 echo -n "postgresql://user:pass@host/db" | gcloud secrets create DATABASE_URL --data-file=-
-echo -n "sk_live_your_clerk_secret" | gcloud secrets create CLERK_SECRET_KEY --data-file=-
-echo -n "whsec_your_webhook_secret" | gcloud secrets create CLERK_WEBHOOK_SECRET --data-file=-
-echo -n "your-production-jwt-secret" | gcloud secrets create JWT_SECRET --data-file=-
-echo -n "pk_live_your_clerk_key" | gcloud secrets create NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY --data-file=-
-echo -n "https://yourapp.run.app" | gcloud secrets create NEXT_PUBLIC_APP_URL --data-file=-
-echo -n "https://yourapp.run.app/api" | gcloud secrets create NEXT_PUBLIC_API_URL --data-file=-
+echo -n "507f1f77bcf86cd799439011" | gcloud secrets create NEXT_PUBLIC_APPWRITE_PROJECT_ID --data-file=-
+echo -n "https://cloud.appwrite.io/v1" | gcloud secrets create NEXT_PUBLIC_APPWRITE_URL --data-file=-
 echo -n "my-app-uploads" | gcloud secrets create GOOGLE_CLOUD_BUCKET_NAME --data-file=-
 ```
 

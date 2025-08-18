@@ -1,0 +1,45 @@
+# Production Environment Configuration
+# Copy this file to terraform.tfvars and enter your actual production values
+
+# ===== REQUIRED: Your GCP Project (PRODUCTION) =====
+project_id = "your-project-prod-123"  # Your actual GCP project ID for PRODUCTION
+
+# ===== REQUIRED: Your GitHub Repository =====
+github_owner      = "your-username"     # Your GitHub username or organization
+github_repository = "your-repo-name"    # Your repository name (without owner)
+
+# ===== REQUIRED: Appwrite Configuration (PRODUCTION) =====
+appwrite_project_id = "507f1f77bcf86cd799439011"  # Your PRODUCTION Appwrite project ID
+appwrite_url       = "https://cloud.appwrite.io/v1"  # Appwrite endpoint (usually this default)
+
+# ===== REQUIRED: Production Monitoring =====
+alert_email = "alerts@yourcompany.com"  # Email for production alerts (IMPORTANT!)
+
+# ===== OPTIONAL: Customization =====
+region   = "us-central1"      # GCP region (optional, defaults to us-central1)
+app_name = "my-awesome-app"   # App name for resource naming (optional, defaults to turborepo-app)
+
+# ===== OPTIONAL: Production Settings =====
+enable_backup         = true  # Enable automated backups (recommended: true)
+backup_retention_days = 30    # Days to keep backups (7-365, recommended: 30)
+
+# ===== OPTIONAL: Additional Repositories =====
+# If you have other repos that should be able to deploy to production
+additional_repositories = [
+  # "your-username/deployment-tools",
+  # "your-org/shared-infrastructure"
+]
+
+# ===== PRODUCTION SECURITY NOTES =====
+# 1. Use a SEPARATE GCP project for production
+# 2. Use a SEPARATE Appwrite project for production  
+# 3. Set up monitoring alerts with alert_email
+# 4. Enable backups for production data
+# 5. All secrets stored in GCP Secret Manager (not GitHub)
+
+# ===== EXAMPLE VALUES (REPLACE WITH YOUR ACTUAL VALUES) =====
+# project_id = "my-startup-prod-2024"
+# github_owner = "john-doe"  
+# github_repository = "my-saas-app"
+# appwrite_project_id = "507f191e810c19729de860ea"
+# alert_email = "john@mystartup.com"

@@ -12,16 +12,14 @@ const path = require('path');
 
 // Required environment variables
 const REQUIRED_VARS = [
-  'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY',
-  'CLERK_SECRET_KEY',
+  'NEXT_PUBLIC_APPWRITE_PROJECT_ID',
+  'NEXT_PUBLIC_APPWRITE_URL',
   'DATABASE_URL'
 ];
 
 // Optional but recommended variables
 const RECOMMENDED_VARS = [
-  'JWT_SECRET',
-  'NEXT_PUBLIC_APP_URL',
-  'NEXT_PUBLIC_API_URL'
+  'NODE_ENV'
 ];
 
 console.log('🔍 Validating environment variables...\n');
@@ -35,9 +33,8 @@ if (!fs.existsSync(envLocalPath)) {
   console.log('   cp .env.example .env.local');
   console.log('');
   console.log('💡 Then open .env.local and replace placeholder values with real ones');
-  console.log('   - Get Clerk keys from: https://dashboard.clerk.com');
-  console.log('   - Generate JWT secret: openssl rand -base64 32');
-  console.log('   - Update database URL if needed');
+  console.log('   - Get Appwrite project ID from: https://cloud.appwrite.io/console');
+  console.log('   - Start Docker Postgres: docker-compose up postgres');
   console.log('');
   process.exit(1);
 }
@@ -74,17 +71,24 @@ RECOMMENDED_VARS.forEach(varName => {
 // Specific validations
 console.log('\n🔍 Specific Validations:');
 
-// Clerk keys validation
-const clerkPubKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-const clerkSecretKey = process.env.CLERK_SECRET_KEY;
+// Appwrite validation
+const appwriteProjectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID;
+const appwriteUrl = process.env.NEXT_PUBLIC_APPWRITE_URL;
 
-if (clerkPubKey && clerkSecretKey) {
-  if (clerkPubKey.startsWith('pk_test_') && clerkSecretKey.startsWith('sk_test_')) {
-    console.log('✅ Clerk: Test environment keys detected');
-  } else if (clerkPubKey.startsWith('pk_live_') && clerkSecretKey.startsWith('sk_live_')) {
-    console.log('✅ Clerk: Production environment keys detected');
+if (appwriteProjectId && appwriteUrl) {
+  if (appwriteProjectId.length >= 20) {
+    console.log('✅ Appwrite: Project ID format looks valid');
   } else {
-    console.log('⚠️  Clerk: Key format validation failed - check your keys');
+    console.log('⚠️  Appwrite: Project ID seems too short - check your project ID');
+    hasWarnings = true;
+  }
+  
+  if (appwriteUrl.includes('cloud.appwrite.io')) {
+    console.log('✅ Appwrite: Using Appwrite Cloud');
+  } else if (appwriteUrl.includes('localhost')) {
+    console.log('✅ Appwrite: Using self-hosted Appwrite');
+  } else {
+    console.log('⚠️  Appwrite: Unrecognized Appwrite URL format');
     hasWarnings = true;
   }
 }
@@ -92,23 +96,12 @@ if (clerkPubKey && clerkSecretKey) {
 // Database URL validation
 const dbUrl = process.env.DATABASE_URL;
 if (dbUrl) {
-  if (dbUrl.startsWith('file:')) {
-    console.log('✅ Database: SQLite (development)');
-  } else if (dbUrl.startsWith('postgresql://')) {
-    console.log('✅ Database: PostgreSQL (production)');
+  if (dbUrl.startsWith('postgresql://')) {
+    console.log('✅ Database: PostgreSQL configured');
   } else {
-    console.log('⚠️  Database: Unrecognized database URL format');
+    console.log('⚠️  Database: Expected PostgreSQL URL (postgresql://...)');
     hasWarnings = true;
   }
-}
-
-// JWT Secret validation
-const jwtSecret = process.env.JWT_SECRET;
-if (jwtSecret && jwtSecret.length < 32) {
-  console.log('⚠️  JWT_SECRET: Should be at least 32 characters long');
-  hasWarnings = true;
-} else if (jwtSecret) {
-  console.log('✅ JWT_SECRET: Length validation passed');
 }
 
 // Final result
@@ -117,8 +110,8 @@ if (hasErrors) {
   console.log('❌ Environment validation FAILED');
   console.log('\n📋 Next steps:');
   console.log('1. Update your .env.local file with actual values');
-  console.log('2. Get Clerk keys from: https://dashboard.clerk.com');
-  console.log('3. Generate JWT secret: openssl rand -base64 32');
+  console.log('2. Get Appwrite project ID from: https://cloud.appwrite.io/console');
+  console.log('3. Start Docker Postgres: docker-compose up postgres');
   console.log('4. Run this script again: node scripts/validate-env.js');
   process.exit(1);
 } else if (hasWarnings) {

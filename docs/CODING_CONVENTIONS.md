@@ -44,12 +44,12 @@ function handleData(data: UserDataI) {
 
 ### Before Creating Anything New:
 
-1. **UI Components** → Check `@repo/ui` package first
-2. **Database Operations** → Use `@repo/database` package (never install `@prisma/client` directly)
+1. **UI Components** → Check `@repo/ui` package first (Shadcn/ui components)
+2. **Database Operations** → Use `@repo/database` package (PostgreSQL only, never install `@prisma/client` directly)
 3. **Authentication** → Use `@repo/auth` package
 4. **Types** → Check `@repo/types` package
 5. **Constants** → Use `@repo/constants` package
-6. **Utilities** → Check `@repo/ui/lib/utils` or create in appropriate package
+6. **Utilities** → Use `cn` from `@repo/ui` for className merging, check other utilities in packages
 
 ### Examples:
 
@@ -65,8 +65,12 @@ import { prisma } from '@repo/database'
 // ❌ PROHIBITED - Creating new button component
 const Button = () => <button>Click me</button>
 
-// ✅ REQUIRED - Use existing UI package
-import { Button } from '@repo/ui'
+// ✅ REQUIRED - Use existing Shadcn/ui components
+import { Button, Card, CardContent } from '@repo/ui'
+
+// ✅ REQUIRED - Use cn utility for className merging
+import { cn } from '@repo/ui'
+const className = cn("base-class", condition && "conditional-class")
 ```
 
 ## 3. Import Organization
@@ -195,6 +199,67 @@ export function useAppState() {
 - **PREFER** server state over client state
 - **MINIMIZE** client-side state management
 
+## 6. Shadcn/ui Component Usage
+
+**REQUIRED**: Use Shadcn/ui components from `@repo/ui` package.
+
+### Component Rules:
+- **ALWAYS** import components from `@repo/ui`
+- **USE** the `cn` utility for className merging
+- **FOLLOW** component composition patterns
+- **CUSTOMIZE** via className props, not inline styles
+
+```typescript
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@repo/ui'
+import { cn } from '@repo/ui'
+
+// ✅ CORRECT - Using Shadcn components with proper composition
+function UserCard({ user, className }: { user: UserI; className?: string }) {
+  return (
+    <Card className={cn("w-full max-w-md", className)}>
+      <CardHeader>
+        <CardTitle>{user.name}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Button variant="outline" size="sm">
+          Edit Profile
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ❌ PROHIBITED - Creating custom components when Shadcn exists
+function CustomButton() {
+  return <button className="custom-styles">Click me</button>
+}
+```
+
+### Adding New Components:
+```bash
+# Navigate to UI package
+cd packages/ui
+
+# Install new Shadcn components
+pnpm dlx shadcn@latest add input label form dialog
+
+# Update exports in packages/ui/src/index.ts
+export * from './components/ui/input'
+export * from './components/ui/label'
+```
+
+### Component Variant Usage:
+```typescript
+// ✅ Use built-in variants
+<Button variant="destructive" size="lg">Delete</Button>
+<Button variant="outline" size="sm">Cancel</Button>
+
+// ✅ Combine with custom classes using cn
+<Button className={cn("w-full", isLoading && "opacity-50")}>
+  Submit
+</Button>
+```
+
 ## Summary - Core Principles
 
 1. **NO `any` types** - Everything must be properly typed with suffix naming
@@ -202,6 +267,39 @@ export function useAppState() {
 3. **Import organization** - Follow the exact grouping and order
 4. **Server-first** - Minimize client components and hooks
 5. **Context API** - Only state management solution allowed
+6. **Shadcn/ui components** - Use existing components, follow composition patterns
+
+## 7. Git Commit Conventions
+
+**PROHIBITED**: Adding AI-generated footers to commit messages.
+
+### Commit Message Rules:
+- **USE** conventional commit format: `type: description`
+- **KEEP** descriptions concise and clear
+- **NO** AI-generated footers or co-authorship attributions
+- **WRITE** in lowercase for commit types
+
+```bash
+# ✅ CORRECT - Clean commit messages
+git commit -m "feat: add user authentication"
+git commit -m "fix: resolve login redirect issue"
+git commit -m "docs: update api documentation"
+
+# ❌ PROHIBITED - AI-generated footers
+git commit -m "feat: add feature
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+```
+
+### Commit Types:
+- `feat:` - New features
+- `fix:` - Bug fixes
+- `docs:` - Documentation changes
+- `refactor:` - Code refactoring
+- `test:` - Adding tests
+- `chore:` - Maintenance tasks
 
 ## Enforcement
 
