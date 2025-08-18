@@ -111,8 +111,8 @@ jobs:
           COPY packages/ packages/
           COPY apps/web/package.json apps/web/
           
-          # Install dependencies
-          RUN pnpm install --frozen-lockfile --prod
+          # Install dependencies (skip prepare script which runs husky)
+          RUN pnpm install --frozen-lockfile --prod --ignore-scripts
           
           # Rebuild the source code only when needed
           FROM base AS builder
