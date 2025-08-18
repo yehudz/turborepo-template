@@ -69,6 +69,17 @@ variable "appwrite_url" {
   }
 }
 
+variable "database_password" {
+  description = "Password for the PostgreSQL database (dev environment)"
+  type        = string
+  sensitive   = true
+  
+  validation {
+    condition     = length(var.database_password) >= 8
+    error_message = "Database password must be at least 8 characters long."
+  }
+}
+
 variable "additional_repositories" {
   description = "Additional GitHub repositories that can deploy to this environment (format: 'owner/repo')"
   type        = list(string)

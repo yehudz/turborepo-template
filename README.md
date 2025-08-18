@@ -78,15 +78,34 @@ Follow these **exact steps** to go from zero to deployed enterprise application.
 
 **Set up your development environment (5 minutes):**
 
-1. **Clone repository:**
-   ```bash
-   git clone https://github.com/your-username/your-repo-name.git
-   cd your-repo-name
-   ```
+1. **Get the code:**
+   
+   **Option A: Use as GitHub Template (Recommended)**
+   - Go to: https://github.com/yehudz/turborepo-template
+   - Click the green **"Use this template"** button
+   - Choose **"Create a new repository"**
+   - Name your repository (e.g., `my-startup-app`)
+   - Select **Public** or **Private**
+   - Click **"Create repository from template"**
+   - Clone your new repository:
+     ```bash
+     git clone https://github.com/YOUR-USERNAME/YOUR-REPO-NAME.git
+     cd YOUR-REPO-NAME
+     ```
+   
+   **Option B: Fork the Repository**
+   - Go to: https://github.com/yehudz/turborepo-template
+   - Click **"Fork"** button in the top right
+   - Clone your fork:
+     ```bash
+     git clone https://github.com/YOUR-USERNAME/turborepo-template.git
+     cd turborepo-template
+     ```
 
-2. **Create environment file:**
+2. **Create environment files:**
    ```bash
    cp .env.example .env.local
+   cp .env.local packages/database/.env.local
    ```
 
 3. **Edit environment file:**
@@ -143,7 +162,55 @@ Follow these **exact steps** to go from zero to deployed enterprise application.
 
 ---
 
-## Part 3: Development Workflow
+## Part 3: Infrastructure Deployment (Optional)
+
+**Deploy your app to Google Cloud Platform:**
+
+### Option A: Quick Deploy (Prompted Setup)
+```bash
+./infrastructure/scripts/setup-dev.sh
+```
+The script will prompt you for all required values.
+
+### Option B: Pre-configured Deploy (Recommended)
+
+1. **Prepare your configuration:**
+   ```bash
+   cd infrastructure/environments/dev
+   cp terraform.tfvars.example terraform.tfvars
+   ```
+
+2. **Edit terraform.tfvars with your values:**
+   ```bash
+   code terraform.tfvars
+   ```
+   
+   **📝 Update these required values:**
+   - `project_id` = Your GCP project ID (e.g., "my-startup-dev-2024")
+   - `github_owner` = Your GitHub username
+   - `github_repository` = Your repository name  
+   - `appwrite_project_id` = Your Appwrite project ID from Part 1
+   - `database_password` = **Strong password for PostgreSQL** (e.g., "MySecure-DB-Pass-2024!")
+   
+   **💡 Important:** Change the database_password from the example value!
+
+3. **Deploy infrastructure:**
+   ```bash
+   cd ../../..  # Back to project root
+   ./infrastructure/scripts/setup-dev.sh
+   ```
+   
+   **The script will:**
+   - ✅ Read your terraform.tfvars (no prompts!)
+   - ✅ Create GCP Cloud SQL PostgreSQL database
+   - ✅ Set up Workload Identity Federation for GitHub Actions
+   - ✅ Deploy your infrastructure automatically
+
+**🎉 Your development infrastructure is deployed!**
+
+---
+
+## Part 4: Development Workflow
 
 **How to develop and test locally:**
 

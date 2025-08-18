@@ -35,3 +35,11 @@ yarn-error.log*
 
 # ui
 dist/
+
+# terraform
+**/.terraform/
+**/terraform.tfvars
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/.terraform.tfstate.lock.info
+**/backend.tf
