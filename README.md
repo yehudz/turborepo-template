@@ -65,13 +65,10 @@ Follow these **exact steps** to go from zero to deployed enterprise application.
    - **Enable** Email/Password authentication
    - **Save** settings
 
-4. **Configure domains:**
-   - Go to **Settings** → **Platforms**
-   - Click **"Add Platform"** → **Web**
-   - Add `http://localhost:3001` (web app)
-   - Click **"Add Platform"** → **Web**  
-   - Add `http://localhost:3000` (admin app)
-   - **Save** platforms
+4. **Authentication is ready:**
+   - ✅ **No additional platform configuration needed**
+   - Modern Appwrite automatically handles local development domains
+   - Your authentication backend is ready to use
 
 **✅ Keep your Project ID handy - you'll need it in the next step!**
 
