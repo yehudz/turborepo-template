@@ -487,7 +487,7 @@ configure_github_variables() {
     gh variable set REGION --body "$region" --repo "$github_owner/$github_repo"
     
     echo "  Setting ARTIFACT_REGISTRY_REPO..."
-    gh variable set ARTIFACT_REGISTRY_REPO --body "turborepo-images" --repo "$github_owner/$github_repo"
+    gh variable set ARTIFACT_REGISTRY_REPO --body "${project_id}-${environment}" --repo "$github_owner/$github_repo"
     
     log_success "GitHub repository variables configured"
 }

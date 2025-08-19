@@ -73,11 +73,50 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Detect changed apps
+        run: |
+          echo "Detecting which apps have changes since last commit..."
+          
+          # Get list of changed packages/apps
+          CHANGED_APPS=$(pnpm turbo run build --filter=...[HEAD^1] --dry-run=json | jq -r '.tasks[] | select(.task == "build") | .package' | grep -E "^(web|admin)$" || true)
+          
+          if [ -z "$CHANGED_APPS" ]; then
+            echo "No app changes detected. Building all apps for safety."
+            echo "DEPLOY_WEB=true" >> $GITHUB_ENV
+            echo "DEPLOY_ADMIN=true" >> $GITHUB_ENV
+          else
+            echo "Changed apps detected: $CHANGED_APPS"
+            if echo "$CHANGED_APPS" | grep -q "web"; then
+              echo "DEPLOY_WEB=true" >> $GITHUB_ENV
+              echo "📦 Web app has changes - will deploy"
+            else
+              echo "DEPLOY_WEB=false" >> $GITHUB_ENV
+              echo "⏭️  Web app unchanged - skipping"
+            fi
+            
+            if echo "$CHANGED_APPS" | grep -q "admin"; then
+              echo "DEPLOY_ADMIN=true" >> $GITHUB_ENV
+              echo "📦 Admin app has changes - will deploy"
+            else
+              echo "DEPLOY_ADMIN=false" >> $GITHUB_ENV
+              echo "⏭️  Admin app unchanged - skipping"
+            fi
+          fi
+
       - name: Build packages
         run: pnpm build
 
-      - name: Build web app
-        run: pnpm --filter web build
+      - name: Build changed apps
+        run: |
+          if [ "${{ env.DEPLOY_WEB }}" = "true" ]; then
+            echo "Building web app..."
+            pnpm --filter web build
+          fi
+          
+          if [ "${{ env.DEPLOY_ADMIN }}" = "true" ]; then
+            echo "Building admin app..."
+            pnpm --filter admin build
+          fi
 
       # Authenticate to Google Cloud using Workload Identity
       - name: Authenticate to Google Cloud
@@ -94,72 +133,126 @@ jobs:
         run: gcloud auth configure-docker ${{ vars.REGION }}-docker.pkg.dev
 
       - name: Create Dockerfile for web app
+        if: env.DEPLOY_WEB == 'true'
         run: |
           cat > apps/web/Dockerfile << 'EOF'
           FROM node:18-alpine AS base
           
-          # Install dependencies only when needed
-          FROM base AS deps
+          # Builder stage - install dependencies and build
+          FROM base AS builder
           RUN apk add --no-cache libc6-compat
           WORKDIR /app
           
           # Install pnpm
           RUN npm install -g pnpm
           
-          # Copy package files
-          COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-          COPY packages/ packages/
-          COPY apps/web/package.json apps/web/
-          
-          # Install dependencies (skip prepare script which runs husky)
-          RUN pnpm install --frozen-lockfile --prod --ignore-scripts
-          
-          # Rebuild the source code only when needed
-          FROM base AS builder
-          WORKDIR /app
-          RUN npm install -g pnpm
-          
-          COPY --from=deps /app/node_modules ./node_modules
+          # Copy all files for build
           COPY . .
           
-          # Build packages first
-          RUN pnpm build
+          # Install ALL dependencies (including dev deps needed for build)
+          RUN pnpm install --frozen-lockfile --ignore-scripts
           
-          # Build the web app
+          # Build packages and web app
+          RUN pnpm build
           RUN pnpm --filter web build
           
           # Production image
           FROM base AS runner
           WORKDIR /app
           
-          ENV NODE_ENV production
+          ENV NODE_ENV=production
+          ENV PORT=3000
+          ENV HOSTNAME="0.0.0.0"
           
           RUN addgroup --system --gid 1001 nodejs
           RUN adduser --system --uid 1001 nextjs
           
-          # Copy built application
-          COPY --from=builder /app/apps/web/public ./public
+          # Copy built application files
           COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
           COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
+          
+          # Create public directory
+          RUN mkdir -p ./public && chown nextjs:nodejs ./public
           
           USER nextjs
           
           EXPOSE 3000
           
-          ENV PORT 3000
-          ENV HOSTNAME "0.0.0.0"
-          
           CMD ["node", "apps/web/server.js"]
           EOF
 
-      - name: Build and push Docker image
+      - name: Create Dockerfile for admin app
+        if: env.DEPLOY_ADMIN == 'true'
         run: |
-          IMAGE_URL="${{ vars.REGION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPO }}/web:${{ github.sha }}"
+          cat > apps/admin/Dockerfile << 'EOF'
+          FROM node:18-alpine AS base
           
-          docker build -t $IMAGE_URL -f apps/web/Dockerfile .
-          docker push $IMAGE_URL
+          # Builder stage - install dependencies and build
+          FROM base AS builder
+          RUN apk add --no-cache libc6-compat
+          WORKDIR /app
           
-          echo "IMAGE_URL=$IMAGE_URL" >> $GITHUB_ENV
+          # Install pnpm
+          RUN npm install -g pnpm
+          
+          # Copy all files for build
+          COPY . .
+          
+          # Install ALL dependencies (including dev deps needed for build)
+          RUN pnpm install --frozen-lockfile --ignore-scripts
+          
+          # Build packages and admin app
+          RUN pnpm build
+          RUN pnpm --filter admin build
+          
+          # Production image
+          FROM base AS runner
+          WORKDIR /app
+          
+          ENV NODE_ENV=production
+          ENV PORT=3000
+          ENV HOSTNAME="0.0.0.0"
+          
+          RUN addgroup --system --gid 1001 nodejs
+          RUN adduser --system --uid 1001 nextjs
+          
+          # Copy built application files
+          COPY --from=builder --chown=nextjs:nodejs /app/apps/admin/.next/standalone ./
+          COPY --from=builder --chown=nextjs:nodejs /app/apps/admin/.next/static ./apps/admin/.next/static
+          
+          # Create public directory
+          RUN mkdir -p ./public && chown nextjs:nodejs ./public
+          
+          USER nextjs
+          
+          EXPOSE 3000
+          
+          CMD ["node", "apps/admin/server.js"]
+          EOF
+
+      - name: Build and push Docker images
+        run: |
+          # Build and push web app (if changed)
+          if [ "${{ env.DEPLOY_WEB }}" = "true" ]; then
+            echo "Building and pushing web app Docker image..."
+            WEB_IMAGE_URL="${{ vars.REGION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPO }}/web:${{ github.sha }}"
+            docker build -t $WEB_IMAGE_URL -f apps/web/Dockerfile .
+            docker push $WEB_IMAGE_URL
+            echo "WEB_IMAGE_URL=$WEB_IMAGE_URL" >> $GITHUB_ENV
+          else
+            echo "⏭️  Skipping web app Docker build - no changes"
+          fi
+          
+          # Build and push admin app (if changed)
+          if [ "${{ env.DEPLOY_ADMIN }}" = "true" ]; then
+            echo "Building and pushing admin app Docker image..."
+            ADMIN_IMAGE_URL="${{ vars.REGION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPO }}/admin:${{ github.sha }}"
+            docker build -t $ADMIN_IMAGE_URL -f apps/admin/Dockerfile .
+            docker push $ADMIN_IMAGE_URL
+            echo "ADMIN_IMAGE_URL=$ADMIN_IMAGE_URL" >> $GITHUB_ENV
+          else
+            echo "⏭️  Skipping admin app Docker build - no changes"
+          fi
 
       - name: Set environment-specific config
         run: |
@@ -169,19 +262,22 @@ jobs:
             echo "MAX_INSTANCES=100" >> $GITHUB_ENV
             echo "MEMORY=2Gi" >> $GITHUB_ENV
             echo "CPU=2" >> $GITHUB_ENV
-            echo "SERVICE_NAME=web-app" >> $GITHUB_ENV
+            echo "WEB_SERVICE_NAME=web-app" >> $GITHUB_ENV
+            echo "ADMIN_SERVICE_NAME=admin-app" >> $GITHUB_ENV
           else
             echo "MIN_INSTANCES=0" >> $GITHUB_ENV
             echo "MAX_INSTANCES=10" >> $GITHUB_ENV
             echo "MEMORY=512Mi" >> $GITHUB_ENV
             echo "CPU=1" >> $GITHUB_ENV
-            echo "SERVICE_NAME=web-app-dev" >> $GITHUB_ENV
+            echo "WEB_SERVICE_NAME=web-app-dev" >> $GITHUB_ENV
+            echo "ADMIN_SERVICE_NAME=admin-app-dev" >> $GITHUB_ENV
           fi
           
-      - name: Deploy to Cloud Run
+      - name: Deploy web app to Cloud Run
+        if: env.DEPLOY_WEB == 'true'
         run: |
-          gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image ${{ env.IMAGE_URL }} \
+          gcloud run deploy ${{ env.WEB_SERVICE_NAME }} \
+            --image ${{ env.WEB_IMAGE_URL }} \
             --region ${{ vars.REGION }} \
             --platform managed \
             --allow-unauthenticated \
@@ -197,11 +293,46 @@ jobs:
             --set-secrets NEXT_PUBLIC_APPWRITE_URL=NEXT_PUBLIC_APPWRITE_URL:latest \
             --set-secrets GOOGLE_CLOUD_BUCKET_NAME=GOOGLE_CLOUD_BUCKET_NAME:latest
 
-      - name: Get service URL
+      - name: Deploy admin app to Cloud Run
+        if: env.DEPLOY_ADMIN == 'true'
         run: |
-          SERVICE_URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} --region ${{ vars.REGION }} --format 'value(status.url)')
+          gcloud run deploy ${{ env.ADMIN_SERVICE_NAME }} \
+            --image ${{ env.ADMIN_IMAGE_URL }} \
+            --region ${{ vars.REGION }} \
+            --platform managed \
+            --allow-unauthenticated \
+            --port 3000 \
+            --memory ${{ env.MEMORY }} \
+            --cpu ${{ env.CPU }} \
+            --min-instances ${{ env.MIN_INSTANCES }} \
+            --max-instances ${{ env.MAX_INSTANCES }} \
+            --set-env-vars NODE_ENV=${{ inputs.environment }} \
+            --set-env-vars ENVIRONMENT=${{ inputs.environment }} \
+            --set-secrets DATABASE_URL=DATABASE_URL:latest \
+            --set-secrets NEXT_PUBLIC_APPWRITE_PROJECT_ID=NEXT_PUBLIC_APPWRITE_PROJECT_ID:latest \
+            --set-secrets NEXT_PUBLIC_APPWRITE_URL=NEXT_PUBLIC_APPWRITE_URL:latest \
+            --set-secrets GOOGLE_CLOUD_BUCKET_NAME=GOOGLE_CLOUD_BUCKET_NAME:latest
+
+      - name: Get service URLs
+        run: |
           echo "🚀 Successfully deployed to ${{ inputs.environment }}"
-          echo "📍 Service URL: $SERVICE_URL"
-          echo "🏷️  Service Name: ${{ env.SERVICE_NAME }}"
-          echo "💾 Image: ${{ env.IMAGE_URL }}"
-          echo "SERVICE_URL=$SERVICE_URL" >> $GITHUB_OUTPUT
+          
+          if [ "${{ env.DEPLOY_WEB }}" = "true" ]; then
+            WEB_SERVICE_URL=$(gcloud run services describe ${{ env.WEB_SERVICE_NAME }} --region ${{ vars.REGION }} --format 'value(status.url)')
+            echo "📍 Web App URL: $WEB_SERVICE_URL"
+            echo "🏷️  Web Service: ${{ env.WEB_SERVICE_NAME }}"
+            echo "💾 Web Image: ${{ env.WEB_IMAGE_URL }}"
+            echo "WEB_SERVICE_URL=$WEB_SERVICE_URL" >> $GITHUB_OUTPUT
+          else
+            echo "⏭️  Web app skipped - no changes"
+          fi
+          
+          if [ "${{ env.DEPLOY_ADMIN }}" = "true" ]; then
+            ADMIN_SERVICE_URL=$(gcloud run services describe ${{ env.ADMIN_SERVICE_NAME }} --region ${{ vars.REGION }} --format 'value(status.url)')
+            echo "📍 Admin App URL: $ADMIN_SERVICE_URL"
+            echo "🏷️  Admin Service: ${{ env.ADMIN_SERVICE_NAME }}"
+            echo "💾 Admin Image: ${{ env.ADMIN_IMAGE_URL }}"
+            echo "ADMIN_SERVICE_URL=$ADMIN_SERVICE_URL" >> $GITHUB_OUTPUT
+          else
+            echo "⏭️  Admin app skipped - no changes"
+          fi
