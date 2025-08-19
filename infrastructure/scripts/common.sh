@@ -127,7 +127,11 @@ confirm() {
         prompt="[y/N]"
     fi
     
-    echo -ne "${YELLOW}${message} ${prompt}${NC} "
+    echo ""
+    echo "----------------------------------------"
+    echo "CONFIRMATION REQUIRED: $message"
+    echo "Please answer $prompt:"
+    
     read -r response
     
     if [ -z "$response" ]; then
@@ -144,6 +148,17 @@ confirm() {
     esac
 }
 
+# Read value from terraform.tfvars file
+read_tfvar() {
+    local tfvars_file="$1"
+    local var_name="$2"
+    
+    if [ -f "$tfvars_file" ]; then
+        # Extract value from terraform.tfvars (handles quoted and unquoted values)
+        grep "^${var_name}[[:space:]]*=" "$tfvars_file" | sed 's/^[^=]*=[[:space:]]*//' | sed 's/^"\(.*\)"$/\1/' | sed "s/^'\(.*\)'$/\1/" | head -1
+    fi
+}
+
 # Prompt for input with validation
 prompt_input() {
     local prompt="$1"
@@ -152,10 +167,16 @@ prompt_input() {
     local default_value="$4"
     
     while true; do
+        # Simple, clear prompts without colors - output to stderr so they show up
+        echo "" >&2
+        echo "----------------------------------------" >&2
         if [ -n "$default_value" ]; then
-            echo -ne "${CYAN}${prompt} [$default_value]:${NC} "
+            echo "INPUT REQUIRED: $prompt" >&2
+            echo "Default value: $default_value" >&2
+            echo "Press Enter to use default, or type a new value:" >&2
         else
-            echo -ne "${CYAN}${prompt}:${NC} "
+            echo "INPUT REQUIRED: $prompt" >&2
+            echo "Enter value:" >&2
         fi
         
         read -r input
@@ -167,10 +188,11 @@ prompt_input() {
         
         # Validate input
         if [ -n "$validation_regex" ] && ! [[ $input =~ $validation_regex ]]; then
-            log_error "$error_message"
+            log_error "$error_message" >&2
             continue
         fi
         
+        # Return the value via stdout (this is what gets captured)
         echo "$input"
         return 0
     done
@@ -237,6 +259,7 @@ enable_gcp_apis() {
     log_step "Enabling required GCP APIs..."
     
     local required_apis=(
+        "compute.googleapis.com"
         "cloudbuild.googleapis.com"
         "run.googleapis.com"
         "artifactregistry.googleapis.com"
@@ -246,6 +269,8 @@ enable_gcp_apis() {
         "storage.googleapis.com"
         "sql-component.googleapis.com"
         "sqladmin.googleapis.com"
+        "servicenetworking.googleapis.com"
+        "vpcaccess.googleapis.com"
     )
     
     for api in "${required_apis[@]}"; do
@@ -260,6 +285,27 @@ enable_gcp_apis() {
     done
     
     log_success "All APIs enabled successfully"
+    
+    # Wait for Compute Engine API to be ready (required for VPC access)
+    log_info "Waiting for Compute Engine API to be ready..." >&2
+    local retries=0
+    local max_retries=30
+    
+    while [ $retries -lt $max_retries ]; do
+        if gcloud compute networks describe default --project="$project_id" >/dev/null 2>&1; then
+            log_success "Compute Engine API is ready" >&2
+            break
+        fi
+        
+        echo -n "." >&2
+        sleep 10
+        retries=$((retries + 1))
+    done
+    
+    if [ $retries -eq $max_retries ]; then
+        log_error "Timeout waiting for Compute Engine API. Try running the script again in a few minutes." >&2
+        exit 1
+    fi
 }
 
 # Create Terraform state bucket
@@ -268,23 +314,24 @@ create_terraform_state_bucket() {
     local environment="$2"
     local bucket_name="${project_id}-terraform-state-${environment}"
     
-    log_step "Setting up Terraform state bucket..."
+    log_step "Setting up Terraform state bucket..." >&2
     
-    # Check if bucket exists
-    if gsutil ls "gs://$bucket_name" >/dev/null 2>&1; then
-        log_success "Terraform state bucket already exists: $bucket_name"
+    # Check if bucket exists - use gcloud storage instead of gsutil for Python 3.13 compatibility
+    if gcloud storage buckets describe "gs://$bucket_name" >/dev/null 2>&1; then
+        log_success "Terraform state bucket already exists: $bucket_name" >&2
     else
-        log_info "Creating Terraform state bucket: $bucket_name"
+        log_info "Creating Terraform state bucket: $bucket_name" >&2
         
-        # Create bucket
-        gsutil mb -p "$project_id" "gs://$bucket_name"
+        # Create bucket using gcloud storage (Python 3.13 compatible)
+        gcloud storage buckets create "gs://$bucket_name" --project="$project_id" --location="us-central1" >&2
         
         # Enable versioning
-        gsutil versioning set on "gs://$bucket_name"
+        gcloud storage buckets update "gs://$bucket_name" --versioning >&2
         
-        log_success "Created Terraform state bucket with versioning enabled"
+        log_success "Created Terraform state bucket with versioning enabled" >&2
     fi
     
+    # Only output the bucket name to stdout (this is what gets captured)
     echo "$bucket_name"
 }
 
@@ -316,15 +363,21 @@ generate_terraform_vars() {
     local github_repo="$4"
     local appwrite_project_id="$5"
     local alert_email="$6"
-    
-    log_step "Generating terraform.tfvars..."
+    local database_password="$7"
     
     local tfvars_file="$env_dir/terraform.tfvars"
     
-    # Copy from example if not exists
-    if [ ! -f "$tfvars_file" ]; then
-        cp "$env_dir/terraform.tfvars.example" "$tfvars_file"
+    # Only generate if file doesn't exist (user may have pre-created it)
+    if [ -f "$tfvars_file" ]; then
+        log_step "Using existing terraform.tfvars..." >&2
+        log_success "Found terraform.tfvars with user configuration" >&2
+        return 0
     fi
+    
+    log_step "Generating terraform.tfvars..." >&2
+    
+    # Copy from example
+    cp "$env_dir/terraform.tfvars.example" "$tfvars_file"
     
     # Update values
     sed -i.bak "s/your-project-.*-123/$project_id/g" "$tfvars_file"
@@ -434,7 +487,7 @@ configure_github_variables() {
     gh variable set REGION --body "$region" --repo "$github_owner/$github_repo"
     
     echo "  Setting ARTIFACT_REGISTRY_REPO..."
-    gh variable set ARTIFACT_REGISTRY_REPO --body "turborepo-images" --repo "$github_owner/$github_repo"
+    gh variable set ARTIFACT_REGISTRY_REPO --body "${project_id}-${environment}" --repo "$github_owner/$github_repo"
     
     log_success "GitHub repository variables configured"
 }
