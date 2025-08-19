@@ -404,6 +404,135 @@
 
 ---
 
+## 🚀 NEXT PHASE: Mobile Enhancement & Template CLI
+
+**Status:** 📋 PLANNED  
+**Priority:** HIGH  
+
+## 🎨 Phase 1: Mobile UI Enhancement (NEXT UP)
+
+### 1.1 Re-integrate NativeWind + Tamagui 🎨
+- [ ] Add NativeWind back to mobile app configuration
+- [ ] Re-integrate Tamagui components in mobile UI package
+- [ ] Update `@repo/ui` to properly export both NativeWind and Tamagui
+- [ ] Create example components showcasing both libraries
+- [ ] Update mobile app to demonstrate NativeWind + Tamagui integration
+- [ ] Test styling compilation and build process
+
+### 1.2 Enhanced Mobile UI Components 📱
+- [ ] Create comprehensive mobile component library
+- [ ] Add platform-specific styling examples
+- [ ] Implement responsive design patterns for mobile
+- [ ] Add dark mode support for mobile components
+- [ ] Create mobile-specific design tokens
+- [ ] Update documentation with mobile UI best practices
+
+## 🛠️ Phase 2: Enhanced Template CLI (HIGH PRIORITY)
+
+### 2.1 Comprehensive Template Generation Options 🎯
+- [ ] Update `npx create-yehudz-template` with three options:
+  - [ ] **Web Only**: Clone only web apps (web, admin, api) + packages
+  - [ ] **Web + Mobile**: Clone complete template with mobile app
+  - [ ] **Mobile Only**: Clone mobile app + necessary packages only
+- [ ] Add interactive prompts for template customization
+- [ ] Implement selective file copying based on user choice
+- [ ] Add post-generation setup instructions per template type
+
+### 2.2 Template Customization Features 🔧
+- [ ] Add company/project name customization during generation
+- [ ] Allow custom package naming (replace @repo with @company)
+- [ ] Add option to customize mobile app bundle identifiers
+- [ ] Implement template variant selection (basic vs full-featured)
+- [ ] Add database provider selection (PostgreSQL vs other options)
+- [ ] Include authentication provider options (Appwrite vs others)
+
+### 2.3 Enhanced CLI User Experience 📋
+- [ ] Add progress indicators during template generation
+- [ ] Implement validation for user inputs
+- [ ] Add confirmation step before file generation
+- [ ] Create post-generation setup wizard
+- [ ] Add option to automatically run initial setup commands
+- [ ] Include success message with next steps
+
+## 📚 Phase 3: Account Setup Documentation (ADD TO README.md)
+
+### 3.1 Apple Developer Account Setup 🍎
+- [ ] Add Apple Developer account setup section to README.md (bottom)
+- [ ] Document Apple ID requirements and verification process
+- [ ] Add step-by-step App Store Connect configuration
+- [ ] Include TestFlight setup instructions
+- [ ] Document certificate and provisioning profile creation
+- [ ] Add troubleshooting section for common Apple Developer issues
+
+### 3.2 Google Play Console Setup 🤖
+- [ ] Add Google Play Developer account section to README.md (bottom)
+- [ ] Document one-time $25 registration fee process
+- [ ] Add Play Console configuration instructions
+- [ ] Include app signing and release management setup
+- [ ] Document internal testing track configuration
+- [ ] Add Google Play policies and compliance checklist
+
+### 3.3 Expo Account & EAS Setup 📱
+- [ ] Add Expo account setup section to README.md (bottom)
+- [ ] Document EAS CLI installation and authentication
+- [ ] Add project initialization and configuration steps
+- [ ] Include build quota and pricing information
+- [ ] Document secrets and credential management
+- [ ] Add Expo Go app setup for development testing
+
+**Note:** All documentation will be added to the main README.md file at the bottom, creating a comprehensive setup guide for mobile deployment prerequisites.
+
+## 📱 Phase 4: Mobile App Store Deployment (FINAL PHASE)
+
+### 4.1 iOS TestFlight Integration 🍎
+- [ ] Add TestFlight build profile to `apps/mobile/eas.json`
+- [ ] Create GitHub Action for TestFlight builds (`ios-testflight-build.yml`)
+- [ ] Configure automatic TestFlight submission workflow
+- [ ] Add secrets configuration (EXPO_TOKEN, Apple credentials)
+- [ ] Test complete iOS TestFlight workflow end-to-end
+
+### 4.2 Android APK Direct Distribution 🤖
+- [ ] Add internal/preview build profile for Android APK distribution
+- [ ] Create GitHub Action for Android APK builds (`android-apk-build.yml`)
+- [ ] Configure direct APK download and sharing workflow
+- [ ] Add QR code generation for easy APK distribution
+- [ ] Test Android APK installation workflow
+
+### 4.3 Mobile Deployment Documentation 📚
+- [ ] Create comprehensive mobile deployment guide
+- [ ] Add step-by-step TestFlight setup instructions
+- [ ] Document Android APK testing workflow
+- [ ] Add troubleshooting section for mobile builds
+- [ ] Include cost breakdown and requirements
+- [ ] Add tester onboarding instructions
+
+## 🎯 Success Criteria for Next Phase
+
+### Phase 1 Success (UI Libraries):
+1. [ ] **NativeWind + Tamagui** fully integrated in mobile UI
+2. [ ] **Mobile components** showcase both styling libraries
+3. [ ] **Platform-specific exports** work correctly
+4. [ ] **Build process** compiles styling without errors
+
+### Phase 2 Success (Template CLI):
+1. [ ] **Template CLI offers 3 options**: Web-only, Web+Mobile, Mobile-only
+2. [ ] **Customization features** work for company/project names
+3. [ ] **Selective file copying** generates correct variants
+4. [ ] **Post-generation setup** guides users properly
+
+### Phase 3 Success (Documentation in README.md):
+1. [ ] **Apple Developer setup** section added to README.md
+2. [ ] **Google Play Console** setup section added to README.md
+3. [ ] **Expo account setup** section added to README.md
+4. [ ] **Prerequisites** clearly documented before deployment sections
+
+### Phase 4 Success (Deployment):
+1. [ ] **iOS apps deploy to TestFlight** via GitHub Actions
+2. [ ] **Android apps distribute as APKs** for internal testing
+3. [ ] **All deployment workflows** documented and tested
+
+---
+
 ## 🎯 Infrastructure Success Criteria (COMPLETED)
 
 By the end of the infrastructure implementation:
