@@ -32,51 +32,67 @@ const { platform } = await inquirer.prompt([
 
 console.log(chalk.green(`\n🎯 Starting ${platform === 'web' ? 'web' : platform === 'mobile' ? 'mobile' : 'all'} development servers...\n`))
 
-let command
+if (platform === 'all') {
+  // For 'all', we need to run multiple commands in parallel
+  console.log(chalk.gray('Running: turbo run dev --filter="web" --filter="admin" --filter="api" --concurrency=15\n'))
+  console.log(chalk.gray('Running: turbo run start --filter="mobile"\n'))
+  
+  const webProcess = spawn('pnpm', ['turbo', 'run', 'dev', '--filter=web', '--filter=admin', '--filter=api', '--concurrency=15'], {
+    stdio: 'inherit',
+    shell: true
+  })
+  
+  const mobileProcess = spawn('pnpm', ['turbo', 'run', 'start', '--filter=mobile'], {
+    stdio: 'inherit', 
+    shell: true
+  })
 
-switch (platform) {
-  case 'web':
-    // Run only web and admin apps
-    command = 'turbo run dev --filter="!mobile" --concurrency=15'
-    break
-  case 'mobile':
-    // Run only mobile app
-    command = 'turbo run start --filter=mobile'
-    break
-  case 'all':
-    // Run all apps including mobile
-    command = 'turbo run dev --filter="!mobile" --concurrency=15 & turbo run start --filter=mobile'
-    break
-}
-
-console.log(chalk.gray(`Running: ${command}\n`))
-
-// Execute the command
-try {
-  if (platform === 'all') {
-    // For 'all', we need to run multiple commands in parallel
-    const webProcess = spawn('pnpm', ['turbo', 'run', 'dev', '--filter=!mobile', '--concurrency=15'], {
-      stdio: 'inherit',
-      shell: true
-    })
-    
-    const mobileProcess = spawn('pnpm', ['turbo', 'run', 'start', '--filter=mobile'], {
-      stdio: 'inherit', 
-      shell: true
-    })
-
-    // Handle process termination
-    process.on('SIGINT', () => {
-      console.log(chalk.yellow('\n🛑 Shutting down servers...'))
-      webProcess.kill('SIGINT')
+  // Handle process termination
+  process.on('SIGINT', () => {
+    console.log(chalk.yellow('\n🛑 Shutting down servers...'))
+    webProcess.kill('SIGINT')
+    mobileProcess.kill('SIGINT')
+    process.exit(0)
+  })
+  
+  // Wait for either process to exit
+  webProcess.on('exit', (code) => {
+    if (code !== 0) {
+      console.error(chalk.red('❌ Web development servers failed'))
       mobileProcess.kill('SIGINT')
-      process.exit(0)
-    })
-  } else {
-    // For single platform, run normally
-    execSync(`pnpm ${command}`, { stdio: 'inherit' })
+      process.exit(code)
+    }
+  })
+  
+  mobileProcess.on('exit', (code) => {
+    if (code !== 0) {
+      console.error(chalk.red('❌ Mobile development server failed'))
+      webProcess.kill('SIGINT')  
+      process.exit(code)
+    }
+  })
+} else {
+  // Handle single platform cases
+  let command
+  
+  switch (platform) {
+    case 'web':
+      // Run only web and admin apps
+      command = 'turbo run dev --filter="!mobile" --concurrency=15'
+      break
+    case 'mobile':
+      // Run only mobile app
+      command = 'turbo run start --filter=mobile'
+      break
   }
-} catch (error) {
-  console.error(chalk.red('❌ Error starting development servers:'), error.message)
-  process.exit(1)
+
+  console.log(chalk.gray(`Running: ${command}\n`))
+
+  // Execute the command
+  try {
+    execSync(`pnpm ${command}`, { stdio: 'inherit' })
+  } catch (error) {
+    console.error(chalk.red('❌ Error starting development servers:'), error.message)
+    process.exit(1)
+  }
 }
