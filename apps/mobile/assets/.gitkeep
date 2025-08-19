@@ -1,2 +1,6 @@
-# Placeholder assets for mobile app
-# Replace with actual icons when ready for production
+# This file ensures the assets directory is tracked by git
+# Replace with actual icons when ready:
+# - icon.png (1024x1024 app icon)
+# - splash.png (splash screen image)
+# - adaptive-icon.png (Android adaptive icon)
+# - favicon.png (web favicon)

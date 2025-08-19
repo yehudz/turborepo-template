@@ -1,14 +1,5 @@
-import React from 'react'
-import { Stack } from 'expo-router'
-import { StatusBar } from 'expo-status-bar'
+import { Stack } from "expo-router";
 
-export default function RootLayout() {
-  return (
-    <>
-      <StatusBar style="auto" />
-      <Stack>
-        <Stack.Screen name="index" options={{ title: 'Mobile App' }} />
-      </Stack>
-    </>
-  )
+export default function AppLayout() {
+  return <Stack />;
 }

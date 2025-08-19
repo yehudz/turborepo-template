@@ -35,14 +35,14 @@ console.log(chalk.green(`\n🎯 Starting ${platform === 'web' ? 'web' : platform
 if (platform === 'all') {
   // For 'all', we need to run multiple commands in parallel
   console.log(chalk.gray('Running: turbo run dev --filter="web" --filter="admin" --filter="api" --concurrency=15\n'))
-  console.log(chalk.gray('Running: turbo run start --filter="mobile"\n'))
+  console.log(chalk.gray('Running: turbo run dev --filter="mobile"\n'))
   
   const webProcess = spawn('pnpm', ['turbo', 'run', 'dev', '--filter=web', '--filter=admin', '--filter=api', '--concurrency=15'], {
     stdio: 'inherit',
     shell: true
   })
   
-  const mobileProcess = spawn('pnpm', ['turbo', 'run', 'start', '--filter=mobile'], {
+  const mobileProcess = spawn('pnpm', ['turbo', 'run', 'dev', '--filter=mobile'], {
     stdio: 'inherit', 
     shell: true
   })
@@ -82,7 +82,7 @@ if (platform === 'all') {
       break
     case 'mobile':
       // Run only mobile app
-      command = 'turbo run start --filter=mobile'
+      command = 'turbo run dev --filter=mobile'
       break
   }
 
