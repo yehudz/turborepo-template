@@ -1,6 +1,5 @@
-// Export all Shadcn UI components
-export * from './components/ui/button';
-export * from './components/ui/card';
+// Export utilities (shared across platforms)
+export { cn } from './shared/utils';
 
-// Export utilities
-export { cn } from './lib/utils';
+// Default exports for web (most common case)
+export * from './web';

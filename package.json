@@ -1,9 +1,13 @@
 {
   "name": "turborepo-template",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev --concurrency=15",
+    "dev": "node scripts/dev.js",
+    "dev:web": "turbo run dev --filter=\"!mobile\" --concurrency=15",
+    "dev:mobile": "turbo run start --filter=mobile",
+    "dev:all": "turbo run dev --filter=\"!mobile\" --concurrency=15 & turbo run start --filter=mobile",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
@@ -22,7 +26,9 @@
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
+    "chalk": "^5.3.0",
     "dotenv": "^16.4.5",
+    "inquirer": "^9.2.12",
     "eslint-import-resolver-typescript": "^4.4.3",
     "eslint-plugin-import": "^2.32.0",
     "husky": "^9.1.7",
