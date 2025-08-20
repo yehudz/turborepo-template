@@ -267,6 +267,23 @@ Follow these **exact steps** to go from zero to deployed enterprise application.
    - Value: Your copied token
    - Click **"Add secret"**
 
+### EAS Project Auto-Creation
+
+**No manual project setup required!** When you run your first mobile build:
+
+1. **First Build Run:**
+   - EAS automatically detects no project exists
+   - Creates a new EAS project linked to your Expo account
+   - Uses your app's `slug` and `package` identifiers
+   - Project gets a unique ID and build history
+
+2. **Subsequent Builds:**
+   - EAS recognizes the existing project automatically
+   - Uses the same project for all future builds
+   - No additional setup needed
+
+**✅ One project per app, reused forever - completely automated!**
+
 ### Mobile Deployment Environments
 
 #### **QA Environment (Internal Testing)**
