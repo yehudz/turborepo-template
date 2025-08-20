@@ -5,8 +5,8 @@ import { Geist } from "next/font/google";
 const geist = Geist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Web App",
-  description: "Your web application description here",
+  title: "Admin Dashboard",
+  description: "Administrative dashboard for managing your application",
 };
 
 export default function RootLayout({
