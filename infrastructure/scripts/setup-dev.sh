@@ -43,7 +43,7 @@ main() {
     configure_terraform_backend "$bucket_name" "$ENV_DIR/backend.tf"
     
     # Step 6: Generate Configuration
-    generate_terraform_vars "$ENV_DIR" "$PROJECT_ID" "$GITHUB_OWNER" "$GITHUB_REPO" "$APPWRITE_PROJECT_ID"
+    generate_terraform_vars "$ENV_DIR" "$PROJECT_ID" "$GITHUB_OWNER" "$GITHUB_REPO" "$APPWRITE_PROJECT_ID" "" "$DATABASE_PASSWORD"
     
     # Step 7: Deploy Infrastructure
     run_terraform "$ENV_DIR" "$ENVIRONMENT"
@@ -59,20 +59,51 @@ main() {
 collect_configuration() {
     log_step "Configuration setup"
     
-    echo ""
-    log_info "We need some information to set up your development environment:"
-    echo ""
+    local tfvars_file="$ENV_DIR/terraform.tfvars"
     
-    # GCP Project ID
-    local default_project="${GITHUB_OWNER}-${GITHUB_REPO}-dev"
-    PROJECT_ID=$(prompt_input "GCP Project ID for development" "^[a-z][a-z0-9-]{4,28}[a-z0-9]$" "Project ID must be 6-30 chars, lowercase letters, numbers, hyphens only" "$default_project")
-    
-    # Appwrite Project ID
-    APPWRITE_PROJECT_ID=$(prompt_input "Appwrite Project ID" "^[a-zA-Z0-9]{24}$" "Appwrite Project ID must be 24 characters")
-    
-    # App Name (optional)
-    local default_app_name=$(echo "$GITHUB_REPO" | sed 's/[^a-z0-9-]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
-    APP_NAME=$(prompt_input "Application name (for resource naming)" "^[a-z][a-z0-9-]*[a-z0-9]$" "App name must start with letter, contain only lowercase letters, numbers, hyphens" "$default_app_name")
+    # Check if terraform.tfvars exists
+    if [ -f "$tfvars_file" ]; then
+        log_info "Found existing terraform.tfvars - reading configuration from file"
+        echo ""
+        
+        # Read values from terraform.tfvars
+        PROJECT_ID=$(read_tfvar "$tfvars_file" "project_id")
+        APPWRITE_PROJECT_ID=$(read_tfvar "$tfvars_file" "appwrite_project_id")
+        DATABASE_PASSWORD=$(read_tfvar "$tfvars_file" "database_password")
+        APP_NAME=$(read_tfvar "$tfvars_file" "app_name")
+        
+        # Use defaults if not found in file
+        if [ -z "$PROJECT_ID" ]; then
+            PROJECT_ID="${GITHUB_OWNER}-${GITHUB_REPO}-dev"
+        fi
+        if [ -z "$APP_NAME" ]; then
+            APP_NAME=$(echo "$GITHUB_REPO" | sed 's/[^a-z0-9-]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+        fi
+        if [ -z "$DATABASE_PASSWORD" ]; then
+            DATABASE_PASSWORD="dev-password-$(date +%s)"
+        fi
+        
+        log_success "Configuration loaded from terraform.tfvars"
+    else
+        echo ""
+        log_info "No terraform.tfvars found - will prompt for configuration"
+        log_info "Next time, you can pre-create terraform.tfvars to skip these prompts"
+        echo ""
+        
+        # GCP Project ID
+        local default_project="${GITHUB_OWNER}-${GITHUB_REPO}-dev"
+        PROJECT_ID=$(prompt_input "GCP Project ID for development" "^[a-z][a-z0-9-]{4,28}[a-z0-9]$" "Project ID must be 6-30 chars, lowercase letters, numbers, hyphens only" "$default_project")
+        
+        # Appwrite Project ID
+        APPWRITE_PROJECT_ID=$(prompt_input "Appwrite Project ID" "^[a-zA-Z0-9]{20,24}$" "Appwrite Project ID must be 20-24 alphanumeric characters")
+        
+        # Database Password
+        DATABASE_PASSWORD=$(prompt_input "Database password for development" "^.{8,}$" "Password must be at least 8 characters long" "dev-password-$(date +%s)")
+        
+        # App Name (optional)
+        local default_app_name=$(echo "$GITHUB_REPO" | sed 's/[^a-z0-9-]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+        APP_NAME=$(prompt_input "Application name (for resource naming)" "^[a-z][a-z0-9-]*[a-z0-9]$" "App name must start with letter, contain only lowercase letters, numbers, hyphens" "$default_app_name")
+    fi
     
     echo ""
     log_info "Configuration summary:"

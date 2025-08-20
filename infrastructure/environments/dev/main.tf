@@ -23,6 +23,9 @@ module "infrastructure" {
   appwrite_project_id = var.appwrite_project_id
   appwrite_url       = var.appwrite_url
   
+  # Database Configuration
+  database_password = var.database_password
+  
   # Environment-specific settings
   environment = "dev"
 }

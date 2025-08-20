@@ -1,9 +1,12 @@
-import type { Metadata } from "next";
 import "./globals.css";
+import type { Metadata } from "next";
+import { Geist } from "next/font/google";
+
+const geist = Geist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard",
-  description: "Admin dashboard for managing the application",
+  title: "Web App",
+  description: "Your web application description here",
 };
 
 export default function RootLayout({
@@ -12,8 +15,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full bg-white">
-      <body className="h-full">{children}</body>
+    <html lang="en">
+      <body className={geist.className}>{children}</body>
     </html>
   );
 }

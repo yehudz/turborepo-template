@@ -149,7 +149,7 @@ collect_production_configuration() {
     # Appwrite Project ID (production)
     echo ""
     log_warning "Use a SEPARATE Appwrite project for production (not the same as dev)"
-    APPWRITE_PROJECT_ID=$(prompt_input "Appwrite Project ID for PRODUCTION" "^[a-zA-Z0-9]{24}$" "Appwrite Project ID must be 24 characters")
+    APPWRITE_PROJECT_ID=$(prompt_input "Appwrite Project ID for PRODUCTION" "^[a-zA-Z0-9]{20,24}$" "Appwrite Project ID must be 20-24 alphanumeric characters")
     
     # Alert Email (required for production)
     echo ""
