@@ -1,5 +1,5 @@
 # Run lint, typecheck and build before push
 # Note: E2E tests must be run manually with apps running (pnpm dev)
-npm run lint
-npm run typecheck
-npm run build
+pnpm lint
+pnpm typecheck
+pnpm build
