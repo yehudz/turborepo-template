@@ -50,7 +50,7 @@ export async function copyDirectory(src, dest) {
 }
 
 export function getTemplateUrl() {
-  return 'https://github.com/yehudazeytim/turborepo-template.git'
+  return 'https://github.com/yehudz/turborepo-template.git'
 }
 
 export function kebabToTitle(str) {

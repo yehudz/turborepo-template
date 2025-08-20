@@ -96,8 +96,9 @@ async function updateRootPackageJson(projectPath, projectName, apps) {
   const newScripts = { ...packageJson.scripts }
   
   if (apps.includes('mobile')) {
-    newScripts['mobile:start'] = 'turbo run start --filter mobile'
-    newScripts['mobile:build'] = 'turbo run build --filter mobile'
+    newScripts['mobile:dev'] = 'turbo run dev --filter mobile'
+    newScripts['mobile:android'] = 'turbo run android --filter mobile'
+    newScripts['mobile:ios'] = 'turbo run ios --filter mobile'
   }
   
   if (!apps.includes('admin')) {
@@ -116,16 +117,21 @@ async function updateTurboConfig(projectPath, apps) {
   const turboConfigPath = path.join(projectPath, 'turbo.json')
   const turboConfig = await fs.readJson(turboConfigPath)
   
-  // Filter pipeline based on selected apps
-  const pipeline = { ...turboConfig.pipeline }
+  // Handle both old 'pipeline' and new 'tasks' field names
+  const tasksField = turboConfig.tasks || turboConfig.pipeline || {}
+  const tasks = { ...tasksField }
   
   if (!apps.includes('mobile')) {
     // Remove mobile-specific tasks
-    delete pipeline['mobile#start']
-    delete pipeline['mobile#build']
+    delete tasks['mobile#dev']
+    delete tasks['mobile#android']
+    delete tasks['mobile#ios']
   }
   
-  turboConfig.pipeline = pipeline
+  // Use 'tasks' for Turborepo v2+
+  turboConfig.tasks = tasks
+  // Remove old 'pipeline' field if it exists
+  delete turboConfig.pipeline
   
   await fs.writeJson(turboConfigPath, turboConfig, { spaces: 2 })
   console.log(chalk.gray('   Updated turbo.json'))

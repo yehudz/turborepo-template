@@ -121,7 +121,9 @@ export async function createApp() {
     }
     
     if (answers.apps.includes('mobile')) {
-      console.log(chalk.gray('   pnpm mobile:start  # Start Expo dev server'))
+      console.log(chalk.gray('   pnpm mobile:dev     # Start Expo dev server'))
+      console.log(chalk.gray('   pnpm mobile:android # Run on Android device'))
+      console.log(chalk.gray('   pnpm mobile:ios     # Run on iOS device'))
     }
     
     console.log(chalk.gray('   pnpm dev           # Start development servers'))

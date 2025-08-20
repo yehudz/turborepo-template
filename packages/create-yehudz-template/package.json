@@ -1,6 +1,6 @@
 {
   "name": "create-yehudz-template",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Create a new full-stack application with Next.js, React Native, and cloud deployment",
   "type": "module",
   "bin": {
@@ -37,5 +37,14 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yehudz/turborepo-template.git",
+    "directory": "packages/create-yehudz-template"
+  },
+  "homepage": "https://github.com/yehudz/turborepo-template#readme",
+  "bugs": {
+    "url": "https://github.com/yehudz/turborepo-template/issues"
   }
 }
