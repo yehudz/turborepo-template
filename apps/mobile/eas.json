@@ -5,11 +5,12 @@
   },
   "build": {
     "qa": {
-      "distribution": "internal",
+      "distribution": "internal", 
       "channel": "qa",
       "env": {
         "EXPO_PUBLIC_ENV": "qa"
       },
+      "prebuildCommand": "cd ../../ && pnpm install",
       "ios": {
         "buildConfiguration": "Release"
       },
@@ -23,6 +24,7 @@
       "env": {
         "EXPO_PUBLIC_ENV": "production"
       },
+      "prebuildCommand": "cd ../../ && pnpm install",
       "ios": {
         "buildConfiguration": "Release"
       },
