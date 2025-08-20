@@ -319,6 +319,37 @@ Follow these **exact steps** to go from zero to deployed enterprise application.
    
    **✅ Android credentials created! CI/CD will now work.**
 
+5. **Add your app icons (Optional - 1 minute):**
+   
+   The template works without custom icons, but you can add your own:
+   
+   ```bash
+   cd apps/mobile/assets
+   # Add these files (examples of required sizes):
+   # icon.png (1024x1024) - Main app icon
+   # splash.png (1284x2778) - Launch screen background
+   ```
+   
+   Then update `apps/mobile/app.json`:
+   ```json
+   {
+     "expo": {
+       "icon": "./assets/icon.png",
+       "splash": {
+         "image": "./assets/splash.png",
+         "resizeMode": "contain",
+         "backgroundColor": "#ffffff"
+       },
+       "android": {
+         "adaptiveIcon": {
+           "foregroundImage": "./assets/icon.png",
+           "backgroundColor": "#FFFFFF"
+         }
+       }
+     }
+   }
+   ```
+
 ### Mobile CI/CD Requirements
 
 **One-time setup for production mobile deployment:**
