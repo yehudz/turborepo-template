@@ -3,23 +3,37 @@
 import { execSync, spawn } from 'child_process'
 import inquirer from 'inquirer'
 import chalk from 'chalk'
+import fs from 'fs'
+import path from 'path'
 
 console.log(chalk.blue.bold('🚀 Development Server\n'))
 
-const choices = [
-  {
-    name: '🌐 Web only (Next.js apps)',
+// Dynamically detect available apps
+const appsDir = path.join(process.cwd(), 'apps')
+const availableApps = fs.existsSync(appsDir) ? fs.readdirSync(appsDir) : []
+
+const choices = []
+
+if (availableApps.filter(app => !app.includes('mobile')).length > 0) {
+  choices.push({
+    name: '🌐 Web only (Next.js/Backend apps)',
     value: 'web'
-  },
-  {
+  })
+}
+
+if (availableApps.includes('mobile')) {
+  choices.push({
     name: '📱 Mobile only (Expo app)', 
     value: 'mobile'
-  },
-  {
-    name: '🚀 Web + Mobile (all apps)',
+  })
+}
+
+if (availableApps.length > 1) {
+  choices.push({
+    name: '🚀 All apps',
     value: 'all'
-  }
-]
+  })
+}
 
 const { platform } = await inquirer.prompt([
   {
@@ -34,42 +48,54 @@ console.log(chalk.green(`\n🎯 Starting ${platform === 'web' ? 'web' : platform
 
 if (platform === 'all') {
   // For 'all', we need to run multiple commands in parallel
-  console.log(chalk.gray('Running: turbo run dev --filter="web" --filter="admin" --filter="api" --concurrency=15\n'))
-  console.log(chalk.gray('Running: turbo run dev --filter="mobile"\n'))
+  const webApps = availableApps.filter(app => app !== 'mobile')
+  const hasWebApps = webApps.length > 0
+  const hasMobile = availableApps.includes('mobile')
   
-  const webProcess = spawn('pnpm', ['turbo', 'run', 'dev', '--filter=web', '--filter=admin', '--filter=api', '--concurrency=15'], {
-    stdio: 'inherit',
-    shell: true
-  })
+  if (hasWebApps) {
+    const webFilters = webApps.map(app => `--filter=${app}`).join(' ')
+    console.log(chalk.gray(`Running: turbo run dev ${webFilters} --concurrency=15\n`))
+  }
   
-  const mobileProcess = spawn('pnpm', ['turbo', 'run', 'dev', '--filter=mobile'], {
-    stdio: 'inherit', 
-    shell: true
-  })
+  if (hasMobile) {
+    console.log(chalk.gray('Running: turbo run dev --filter=mobile\n'))
+  }
+  
+  const processes = []
+  
+  if (hasWebApps) {
+    const webArgs = ['turbo', 'run', 'dev', ...webApps.map(app => `--filter=${app}`), '--concurrency=15']
+    const webProcess = spawn('pnpm', webArgs, {
+      stdio: 'inherit',
+      shell: true
+    })
+    processes.push(webProcess)
+  }
+  
+  if (hasMobile) {
+    const mobileProcess = spawn('pnpm', ['turbo', 'run', 'dev', '--filter=mobile'], {
+      stdio: 'inherit', 
+      shell: true
+    })
+    processes.push(mobileProcess)
+  }
 
   // Handle process termination
   process.on('SIGINT', () => {
     console.log(chalk.yellow('\n🛑 Shutting down servers...'))
-    webProcess.kill('SIGINT')
-    mobileProcess.kill('SIGINT')
+    processes.forEach(proc => proc.kill('SIGINT'))
     process.exit(0)
   })
   
-  // Wait for either process to exit
-  webProcess.on('exit', (code) => {
-    if (code !== 0) {
-      console.error(chalk.red('❌ Web development servers failed'))
-      mobileProcess.kill('SIGINT')
-      process.exit(code)
-    }
-  })
-  
-  mobileProcess.on('exit', (code) => {
-    if (code !== 0) {
-      console.error(chalk.red('❌ Mobile development server failed'))
-      webProcess.kill('SIGINT')  
-      process.exit(code)
-    }
+  // Wait for any process to exit
+  processes.forEach((proc, index) => {
+    proc.on('exit', (code) => {
+      if (code !== 0) {
+        console.error(chalk.red(`❌ Development server ${index + 1} failed`))
+        processes.forEach(p => p.kill('SIGINT'))
+        process.exit(code)
+      }
+    })
   })
 } else {
   // Handle single platform cases
@@ -77,8 +103,10 @@ if (platform === 'all') {
   
   switch (platform) {
     case 'web':
-      // Run only web and admin apps
-      command = 'turbo run dev --filter="!mobile" --concurrency=15'
+      // Run only non-mobile apps
+      const webApps = availableApps.filter(app => app !== 'mobile')
+      const webFilters = webApps.map(app => `--filter=${app}`).join(' ')
+      command = `turbo run dev ${webFilters} --concurrency=15`
       break
     case 'mobile':
       // Run only mobile app
