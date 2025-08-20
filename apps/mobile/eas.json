@@ -10,6 +10,9 @@
       "env": {
         "EXPO_PUBLIC_ENV": "qa"
       },
+      "cache": {
+        "disabled": false
+      },
       "ios": {
         "buildConfiguration": "Release"
       },
@@ -22,6 +25,9 @@
       "channel": "production",
       "env": {
         "EXPO_PUBLIC_ENV": "production"
+      },
+      "cache": {
+        "disabled": false
       },
       "ios": {
         "buildConfiguration": "Release"
