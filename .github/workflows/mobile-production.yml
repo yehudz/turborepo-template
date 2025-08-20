@@ -66,9 +66,8 @@ jobs:
         working-directory: ./apps/mobile
         run: |
           platform="${{ github.event.inputs.platform }}"
-          # For Android, EAS will use automatic credential management
-          # The first build will create credentials automatically
-          eas build --platform $platform --profile production --non-interactive --auto-submit=false
+          # For Android, EAS will handle credential generation automatically in non-interactive mode
+          eas build --platform $platform --profile production --non-interactive
 
       - name: Submit to App Store (iOS)
         if: github.event.inputs.submit_to_stores == 'true' && (contains(github.event.inputs.platform, 'ios') || github.event.inputs.platform == 'all')
