@@ -300,11 +300,30 @@ Follow these **exact steps** to go from zero to deployed enterprise application.
    - Value: Paste the ID from step 2
    - Click **"Add secret"**
 
+4. **Generate Android credentials (1 minute):**
+   
+   **Important:** This step is required for CI/CD to work with Android builds.
+   
+   ```bash
+   cd apps/mobile
+   eas credentials
+   ```
+   - Select **Android**
+   - Select **qa** (build profile)
+   - Choose **"Keystore: Manage everything needed to build your project"**
+   - Choose **"Set up a new keystore"**
+   - Press **Enter** to accept the default name
+   - Choose **"yes"** to generate keystore in the cloud
+   - Press **any key** to continue
+   - Choose **"Go back"** to exit
+   
+   **✅ Android credentials created! CI/CD will now work.**
+
 ### Mobile CI/CD Requirements
 
 **One-time setup for production mobile deployment:**
 
-4. **Configure App Store credentials (Production only):**
+5. **Configure App Store credentials (Production only):**
    - **iOS:** Apple Developer account credentials for App Store submission
    - **Android:** Google Play Console credentials for Play Store submission
    - These are configured separately in your Expo dashboard when ready for production
