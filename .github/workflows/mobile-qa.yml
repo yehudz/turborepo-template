@@ -1,0 +1,62 @@
+name: Mobile QA Build
+
+on:
+  push:
+    branches: [develop]
+    paths: ['apps/mobile/**']
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - ios
+        - android
+
+jobs:
+  build-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build QA version
+        working-directory: ./apps/mobile
+        run: |
+          platform="${{ github.event.inputs.platform || 'all' }}"
+          eas build --platform $platform --profile qa --non-interactive
+
+      - name: Submit to TestFlight (iOS)
+        if: contains(github.event.inputs.platform, 'ios') || github.event.inputs.platform == 'all' || github.event.inputs.platform == ''
+        working-directory: ./apps/mobile
+        run: eas submit --platform ios --profile qa --non-interactive
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "✅ QA build completed successfully!"
+          echo "📱 iOS: Submitted to TestFlight"
+          echo "🤖 Android: APK available for download"
