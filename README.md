@@ -260,12 +260,42 @@ Follow these **exact steps** to go from zero to deployed enterprise application.
    - Name: `GitHub Actions`
    - Copy the token
 
-2. **Add to GitHub repository:**
+2. **Create EAS project and get Project ID:**
+   ```bash
+   cd apps/mobile
+   eas init
+   ```
+   - Follow prompts to create new project
+   - After creation, get your project ID:
+   ```bash
+   eas project:info
+   # Copy the "ID" value (looks like: a1b2c3d4-e5f6-7890-abcd-ef1234567890)
+   ```
+
+3. **Add secrets to GitHub repository:**
    - Go to GitHub → **Settings** → **Secrets and variables** → **Actions**
-   - Click **"New repository secret"**
+   - Click **"New repository secret"** and add both:
+   
+   **First secret:**
    - Name: `EXPO_TOKEN`
-   - Value: Your copied token
+   - Value: Your Expo token from step 1
    - Click **"Add secret"**
+   
+   **Second secret:**
+   - Name: `EXPO_PROJECT_ID`
+   - Value: Your project ID from step 2
+   - Click **"Add secret"**
+
+### Mobile CI/CD Requirements
+
+**One-time setup for production mobile deployment:**
+
+4. **Configure App Store credentials (Production only):**
+   - **iOS:** Apple Developer account credentials for App Store submission
+   - **Android:** Google Play Console credentials for Play Store submission
+   - These are configured separately in your Expo dashboard when ready for production
+
+**✅ Your mobile CI/CD pipeline is now configured and ready!**
 
 ### Mobile Deployment Environments
 

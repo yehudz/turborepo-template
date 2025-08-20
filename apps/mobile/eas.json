@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 13.2.1"
+    "version": ">= 13.2.1",
+    "appVersionSource": "remote"
   },
   "build": {
     "qa": {
@@ -26,7 +27,7 @@
         "buildConfiguration": "Release"
       },
       "android": {
-        "buildType": "aab"
+        "buildType": "app-bundle"
       }
     }
   },
