@@ -60,7 +60,9 @@ jobs:
         working-directory: ./apps/mobile
         run: |
           platform="${{ github.event.inputs.platform || 'all' }}"
-          eas build --platform $platform --profile qa --non-interactive
+          # For Android, EAS will use automatic credential management
+          # The first build will create credentials automatically
+          eas build --platform $platform --profile qa --non-interactive --auto-submit=false
 
       - name: Submit to TestFlight (iOS)
         if: contains(github.event.inputs.platform, 'ios') || github.event.inputs.platform == 'all' || github.event.inputs.platform == ''

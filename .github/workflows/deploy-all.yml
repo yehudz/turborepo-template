@@ -99,7 +99,9 @@ jobs:
         run: |
           profile="${{ github.event.inputs.environment }}"
           platform="${{ github.event.inputs.mobile_platform || 'all' }}"
-          eas build --platform $platform --profile $profile --non-interactive
+          # For Android, EAS will use automatic credential management
+          # The first build will create credentials automatically
+          eas build --platform $platform --profile $profile --non-interactive --auto-submit=false
 
       - name: Submit to stores (QA)
         if: github.event.inputs.environment == 'qa'
