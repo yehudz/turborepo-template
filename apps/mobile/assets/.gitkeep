@@ -1,6 +1,4 @@
-# This file ensures the assets directory is tracked by git
-# Replace with actual icons when ready:
-# - icon.png (1024x1024 app icon)
-# - splash.png (splash screen image)
-# - adaptive-icon.png (Android adaptive icon)
-# - favicon.png (web favicon)
+# Placeholder file to ensure assets directory is tracked in git
+# Replace with your actual app icons:
+# - icon.png (1024x1024) - App icon  
+# - splash.png (1284x2778) - Launch screen image
