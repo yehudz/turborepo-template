@@ -41,6 +41,21 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      - name: Initialize EAS project
+        working-directory: ./apps/mobile
+        env:
+          EXPO_PROJECT_ID: ${{ secrets.EXPO_PROJECT_ID }}
+        run: |
+          # Set project ID in eas.json if provided
+          if [ -n "$EXPO_PROJECT_ID" ]; then
+            echo "Using project ID: $EXPO_PROJECT_ID"
+            # Update eas.json with project ID
+            npx json -I -f eas.json -e "this.cli.projectId='$EXPO_PROJECT_ID'"
+          else
+            echo "No EXPO_PROJECT_ID found. Please add it to GitHub Secrets."
+            exit 1
+          fi
+
       - name: Build QA version
         working-directory: ./apps/mobile
         run: |
