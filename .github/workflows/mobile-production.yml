@@ -1,0 +1,77 @@
+name: Mobile Production Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - ios
+        - android
+      submit_to_stores:
+        description: 'Submit to App Stores'
+        required: true
+        default: 'false'
+        type: choice
+        options:
+        - 'false'
+        - 'true'
+
+jobs:
+  build-production:
+    runs-on: ubuntu-latest
+    environment: production  # Requires manual approval
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build Production version
+        working-directory: ./apps/mobile
+        run: |
+          platform="${{ github.event.inputs.platform }}"
+          eas build --platform $platform --profile production --non-interactive
+
+      - name: Submit to App Store (iOS)
+        if: github.event.inputs.submit_to_stores == 'true' && (contains(github.event.inputs.platform, 'ios') || github.event.inputs.platform == 'all')
+        working-directory: ./apps/mobile
+        run: eas submit --platform ios --profile production --non-interactive
+
+      - name: Submit to Google Play (Android)
+        if: github.event.inputs.submit_to_stores == 'true' && (contains(github.event.inputs.platform, 'android') || github.event.inputs.platform == 'all')
+        working-directory: ./apps/mobile
+        run: eas submit --platform android --profile production --non-interactive
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "✅ Production build completed successfully!"
+          if [[ "${{ github.event.inputs.submit_to_stores }}" == "true" ]]; then
+            echo "🍎 iOS: Submitted to App Store"
+            echo "🤖 Android: Submitted to Google Play"
+          else
+            echo "📦 Production builds ready for manual submission"
+          fi

@@ -1,0 +1,138 @@
+name: Deploy All Applications
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'qa'
+        type: choice
+        options:
+        - qa
+        - production
+      apps:
+        description: 'Applications to deploy'
+        required: true
+        default: 'web-only'
+        type: choice
+        options:
+        - web-only
+        - mobile-only
+        - all
+      mobile_platform:
+        description: 'Mobile platform (if mobile selected)'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - ios
+        - android
+      confirmation:
+        description: 'Type DEPLOY to confirm'
+        required: true
+
+jobs:
+  validate-input:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate confirmation
+        if: github.event.inputs.confirmation != 'DEPLOY'
+        run: |
+          echo "❌ Invalid confirmation. Please type 'DEPLOY' exactly."
+          exit 1
+
+  deploy-web:
+    needs: validate-input
+    if: contains(github.event.inputs.apps, 'web') || github.event.inputs.apps == 'all'
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: ${{ github.event.inputs.environment }}
+      confirmation: ${{ github.event.inputs.confirmation }}
+    secrets: inherit
+
+  deploy-mobile:
+    needs: validate-input
+    if: contains(github.event.inputs.apps, 'mobile') || github.event.inputs.apps == 'all'
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build mobile app
+        working-directory: ./apps/mobile
+        run: |
+          profile="${{ github.event.inputs.environment }}"
+          platform="${{ github.event.inputs.mobile_platform || 'all' }}"
+          eas build --platform $platform --profile $profile --non-interactive
+
+      - name: Submit to stores (QA)
+        if: github.event.inputs.environment == 'qa'
+        working-directory: ./apps/mobile
+        run: |
+          platform="${{ github.event.inputs.mobile_platform || 'all' }}"
+          if [[ "$platform" == "all" || "$platform" == "ios" ]]; then
+            eas submit --platform ios --profile qa --non-interactive
+          fi
+
+      - name: Submit to stores (Production)
+        if: github.event.inputs.environment == 'production'
+        working-directory: ./apps/mobile
+        run: |
+          platform="${{ github.event.inputs.mobile_platform || 'all' }}"
+          if [[ "$platform" == "all" || "$platform" == "ios" ]]; then
+            eas submit --platform ios --profile production --non-interactive
+          fi
+          if [[ "$platform" == "all" || "$platform" == "android" ]]; then
+            eas submit --platform android --profile production --non-interactive
+          fi
+
+  notify-completion:
+    needs: [deploy-web, deploy-mobile]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deployment summary
+        run: |
+          echo "🚀 Deployment Summary:"
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Apps: ${{ github.event.inputs.apps }}"
+          echo "Mobile Platform: ${{ github.event.inputs.mobile_platform }}"
+          echo ""
+          if [[ "${{ needs.deploy-web.result }}" == "success" ]]; then
+            echo "✅ Web deployment: SUCCESS"
+          elif [[ "${{ needs.deploy-web.result }}" == "skipped" ]]; then
+            echo "⏭️ Web deployment: SKIPPED"
+          else
+            echo "❌ Web deployment: FAILED"
+          fi
+          
+          if [[ "${{ needs.deploy-mobile.result }}" == "success" ]]; then
+            echo "✅ Mobile deployment: SUCCESS"
+          elif [[ "${{ needs.deploy-mobile.result }}" == "skipped" ]]; then
+            echo "⏭️ Mobile deployment: SKIPPED"
+          else
+            echo "❌ Mobile deployment: FAILED"
+          fi
