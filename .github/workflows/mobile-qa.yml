@@ -37,6 +37,12 @@ jobs:
       - name: Build shared packages
         run: pnpm build --filter=@repo/ui
 
+      - name: Generate package-lock.json for EAS
+        working-directory: ./apps/mobile
+        run: |
+          # Create package-lock.json from current dependencies to help EAS with dependency resolution
+          npm install --package-lock-only
+
       - name: Setup EAS
         uses: expo/expo-github-action@v8
         with:
