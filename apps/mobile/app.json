@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "Turborepo Template",
+    "slug": "turborepo-template",
     "version": "1.0.0",
     "scheme": "com.turbo.example",
     "orientation": "portrait",

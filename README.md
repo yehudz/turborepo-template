@@ -260,30 +260,44 @@ Follow these **exact steps** to go from zero to deployed enterprise application.
    - Name: `GitHub Actions`
    - Copy the token
 
-2. **Create EAS project and get Project ID:**
+2. **Set up your mobile project (2 minutes):**
+   
+   **First, choose your app name:**
    ```bash
    cd apps/mobile
+   # Open app.json and change these two lines:
+   # "name": "Your App Name" (what users see)
+   # "slug": "your-app-slug" (lowercase, dashes only, no spaces)
+   ```
+   
+   **Then create the EAS project:**
+   ```bash
    eas init
    ```
-   - Follow prompts to create new project
-   - After creation, get your project ID:
+   - It will use the slug from your app.json
+   - Press **Enter** to confirm
+   - When it's done, run:
    ```bash
    eas project:info
-   # Copy the "ID" value (looks like: a1b2c3d4-e5f6-7890-abcd-ef1234567890)
    ```
+   - **Copy the ID** shown (it's a long string with dashes)
 
-3. **Add secrets to GitHub repository:**
-   - Go to GitHub → **Settings** → **Secrets and variables** → **Actions**
-   - Click **"New repository secret"** and add both:
+3. **Add to GitHub (1 minute):**
+   - Go to your GitHub repository
+   - Click **Settings** (top menu)
+   - Click **Secrets and variables** → **Actions** (left sidebar)
+   - Add two secrets:
    
-   **First secret:**
+   **Secret #1:**
+   - Click **"New repository secret"**
    - Name: `EXPO_TOKEN`
-   - Value: Your Expo token from step 1
+   - Value: Paste the token from step 1
    - Click **"Add secret"**
    
-   **Second secret:**
+   **Secret #2:**
+   - Click **"New repository secret"** again
    - Name: `EXPO_PROJECT_ID`
-   - Value: Your project ID from step 2
+   - Value: Paste the ID from step 2
    - Click **"Add secret"**
 
 ### Mobile CI/CD Requirements
