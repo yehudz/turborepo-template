@@ -5,10 +5,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev --port 3003 --turbopack",
+    "dev:ios": "npx cap run ios --livereload --external --port=3003",
+    "dev:android": "npx cap run android --livereload --external --port=3003",
     "build": "next build && npx cap sync",
     "start": "next start",
     "lint": "next lint --max-warnings 0",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "mobile:clean": "rm -rf .next out ios/App/App/public android/app/src/main/assets/public",
+    "mobile:sync": "npx cap sync"
   },
   "dependencies": {
     "@repo/auth": "workspace:*",
