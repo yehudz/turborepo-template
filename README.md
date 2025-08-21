@@ -1,9 +1,10 @@
 # 🚀 Enterprise Turborepo Template
 
-**The complete full-stack template for modern web applications.** From local development to production deployment in 15 minutes.
+**The complete full-stack template for modern web and mobile applications.** From local development to production deployment in 15 minutes.
 
 ✅ **Next.js 15** + **React 19** + **TypeScript**  
 ✅ **Shadcn/ui** design system + **Tailwind CSS v4**  
+✅ **Cross-platform mobile apps** with **Capacitor** (iOS & Android)  
 ✅ **Appwrite authentication** + **PostgreSQL database**  
 ✅ **Google Cloud deployment** with **manual CI/CD approval**  
 ✅ **Complete automation** - one-command setup  
@@ -154,11 +155,55 @@ Follow these **exact steps** to go from zero to deployed enterprise application.
    pnpm dev
    ```
 
-9. **Open your applications:**
-   - **Web app:** http://localhost:3001
-   - **Admin app:** http://localhost:3000
+9. **Choose your development environment:**
+   The interactive menu will show:
+   - 🌐 **Web only** (admin, web, mobile web, api)
+   - 📱 **iOS Simulator** (opens Xcode automatically)
+   - 🤖 **Android Emulator** (opens Android Studio automatically)  
+   - 📱🤖 **Both mobile apps** (iOS + Android)
+   - 🚀 **All apps** (complete development environment)
+
+10. **Access your applications:**
+    - **Web app:** http://localhost:3001
+    - **Admin app:** http://localhost:3000
+    - **Mobile web:** http://localhost:3003
+    - **API:** http://localhost:3002
 
 **🎉 Local development is now running!**
+
+---
+
+## 📱 Mobile Development (iOS & Android)
+
+**For native mobile app development, you'll need additional tools:**
+
+### iOS Development (macOS only)
+1. **Install Xcode** (from App Store)
+2. **Install CocoaPods:**
+   ```bash
+   # Install Ruby (if needed)
+   brew install rbenv ruby-build
+   rbenv install 3.2.0 && rbenv global 3.2.0
+   
+   # Install CocoaPods
+   gem install cocoapods
+   ```
+
+### Android Development (All platforms)
+1. **Install Java 17:**
+   ```bash
+   brew install openjdk@17
+   echo 'export JAVA_HOME="/opt/homebrew/opt/openjdk@17"' >> ~/.zshrc
+   ```
+2. **Install Android Studio** (from https://developer.android.com/studio)
+
+### Mobile Development Workflow
+1. **Choose mobile option in `pnpm dev` menu**
+2. **Xcode/Android Studio opens automatically**
+3. **Press play button in IDE to run on simulator/emulator**
+4. **Live reload works automatically** - changes reflect instantly!
+
+📖 **Complete mobile development guide:** [`docs/MOBILE_DEVELOPMENT.md`](docs/MOBILE_DEVELOPMENT.md)
 
 ---
 
@@ -448,11 +493,22 @@ git push origin feature/x   # Push changes
 
 ### Development Commands
 ```bash
-pnpm dev                 # Start all apps in development (interactive menu)
+pnpm dev                 # Interactive menu: web, mobile (iOS/Android), or all apps
 pnpm build              # Build all apps for production
 pnpm lint               # Lint all packages
 pnpm typecheck          # Type check all packages
 pnpm validate-env       # Validate environment setup
+```
+
+### Mobile Development Commands
+```bash
+cd apps/mobile
+pnpm dev                # Start mobile Next.js server
+pnpm dev:ios            # Run on iOS Simulator with live reload
+pnpm dev:android        # Run on Android Emulator with live reload
+pnpm build              # Build mobile app and sync with native platforms
+npx cap open ios        # Open iOS project in Xcode
+npx cap open android    # Open Android project in Android Studio
 ```
 
 ### Database Commands

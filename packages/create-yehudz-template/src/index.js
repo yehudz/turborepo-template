@@ -51,9 +51,9 @@ export async function createApp() {
           checked: true
         },
         {
-          name: 'Mobile app (Expo + React Native)',
+          name: 'Mobile app (Next.js + Capacitor for iOS/Android)',
           value: 'mobile',
-          checked: false
+          checked: true
         },
         {
           name: 'API backend (Express)',
@@ -121,9 +121,8 @@ export async function createApp() {
     }
     
     if (answers.apps.includes('mobile')) {
-      console.log(chalk.gray('   pnpm mobile:dev     # Start Expo dev server'))
-      console.log(chalk.gray('   pnpm mobile:android # Run on Android device'))
-      console.log(chalk.gray('   pnpm mobile:ios     # Run on iOS device'))
+      console.log(chalk.gray('   pnpm dev           # Interactive menu: choose mobile iOS/Android'))
+      console.log(chalk.gray('   # See docs/MOBILE_DEVELOPMENT.md for mobile setup guide'))
     }
     
     console.log(chalk.gray('   pnpm dev           # Start development servers'))
