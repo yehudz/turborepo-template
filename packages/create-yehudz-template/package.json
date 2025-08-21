@@ -1,6 +1,6 @@
 {
   "name": "create-yehudz-template",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Create a new full-stack application with Next.js, React Native, and cloud deployment",
   "type": "module",
   "bin": {
