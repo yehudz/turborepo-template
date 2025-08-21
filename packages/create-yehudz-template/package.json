@@ -1,7 +1,7 @@
 {
   "name": "create-yehudz-template",
   "version": "1.0.5",
-  "description": "Create a new full-stack application with Next.js, React Native, and cloud deployment",
+  "description": "Create a new full-stack application with Next.js and cloud deployment",
   "type": "module",
   "bin": {
     "create-yehudz-template": "./bin/cli.js"
@@ -12,7 +12,7 @@
     "templates"
   ],
   "scripts": {
-    "dev": "node bin/cli.js",
+    "dev": "echo 'create-yehudz-template: No dev server needed - this is a CLI tool'",
     "build": "echo 'No build step needed'",
     "test": "echo 'No tests yet'"
   },
@@ -20,8 +20,6 @@
     "create-app",
     "turborepo",
     "nextjs",
-    "react-native",
-    "expo",
     "full-stack",
     "template"
   ],

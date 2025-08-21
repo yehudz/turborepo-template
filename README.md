@@ -3,11 +3,9 @@
 **The complete full-stack template for modern web applications.** From local development to production deployment in 15 minutes.
 
 ✅ **Next.js 15** + **React 19** + **TypeScript**  
-✅ **React Native mobile app** with **Expo SDK 52**  
 ✅ **Shadcn/ui** design system + **Tailwind CSS v4**  
 ✅ **Appwrite authentication** + **PostgreSQL database**  
 ✅ **Google Cloud deployment** with **manual CI/CD approval**  
-✅ **Mobile CI/CD** with **EAS Build** and **TestFlight/Google Play**  
 ✅ **Complete automation** - one-command setup  
 
 ---
@@ -164,275 +162,7 @@ Follow these **exact steps** to go from zero to deployed enterprise application.
 
 ---
 
-## Part 3: Mobile App Development (Optional)
-
-**If you opted for the mobile app during setup, follow these steps:**
-
-### Prerequisites for Mobile Development
-
-1. **Install Expo CLI:**
-   ```bash
-   npm install -g @expo/cli
-   npm install -g eas-cli
-   ```
-
-2. **Install mobile development tools:**
-   - **iOS Development:** Xcode (macOS only) or iOS Simulator
-   - **Android Development:** Android Studio or Android device
-   - **Testing on device:** Expo Go app from App Store/Google Play
-
-### Local Mobile Development
-
-1. **Start mobile development server:**
-   ```bash
-   # From project root
-   pnpm dev
-   # Select "Mobile only" or "All apps" when prompted
-   ```
-
-2. **Test on your device:**
-   - Install **Expo Go** app on your phone
-   - Scan the QR code displayed in terminal
-   - Your mobile app will load on your device
-
-3. **Test on simulators:**
-   ```bash
-   # iOS Simulator (macOS only)
-   press 'i' in the terminal
-   
-   # Android Emulator
-   press 'a' in the terminal
-   ```
-
-### Mobile App Structure
-
-- **`apps/mobile/`** - React Native app with Expo
-- **`apps/mobile/app/index.tsx`** - Main mobile screen
-- **`apps/mobile/app/_layout.tsx`** - Navigation layout
-- Uses **React Native StyleSheet** for platform-optimized styling
-
-### Mobile Development Workflow
-
-1. **Make changes** to files in `apps/mobile/`
-2. **Fast Refresh** automatically updates your app
-3. **Test on device** using Expo Go
-4. **Commit changes** and push to GitHub
-
-**📱 Your mobile app is now ready for development!**
-
----
-
-## Part 4: Mobile CI/CD Setup (EAS Build)
-
-**Set up professional mobile deployment pipeline:**
-
-### One-Time EAS Setup
-
-1. **Create Expo account:**
-   ```bash
-   # Open Expo dashboard:
-   open https://expo.dev
-   ```
-   - Sign up for free account
-   - Verify your email
-
-2. **Login to EAS:**
-   ```bash
-   cd apps/mobile
-   eas login
-   ```
-
-3. **Configure EAS builds:**
-   ```bash
-   eas build:configure
-   ```
-   - This creates `eas.json` with QA and Production profiles
-
-### GitHub Secrets Setup
-
-1. **Get your Expo token:**
-   ```bash
-   eas whoami
-   # Note your username, then:
-   open https://expo.dev/accounts/[YOUR-USERNAME]/settings/access-tokens
-   ```
-   - Click **"Create Token"**
-   - Name: `GitHub Actions`
-   - Copy the token
-
-2. **Set up your mobile project (2 minutes):**
-   
-   **First, choose your app name:**
-   ```bash
-   cd apps/mobile
-   # Open app.json and change these two lines:
-   # "name": "Your App Name" (what users see)
-   # "slug": "your-app-slug" (lowercase, dashes only, no spaces)
-   ```
-   
-   **Then create the EAS project:**
-   ```bash
-   eas init
-   ```
-   - It will use the slug from your app.json
-   - Press **Enter** to confirm
-   - When it's done, run:
-   ```bash
-   eas project:info
-   ```
-   - **Copy the ID** shown (it's a long string with dashes)
-
-3. **Add to GitHub (1 minute):**
-   - Go to your GitHub repository
-   - Click **Settings** (top menu)
-   - Click **Secrets and variables** → **Actions** (left sidebar)
-   - Add two secrets:
-   
-   **Secret #1:**
-   - Click **"New repository secret"**
-   - Name: `EXPO_TOKEN`
-   - Value: Paste the token from step 1
-   - Click **"Add secret"**
-   
-   **Secret #2:**
-   - Click **"New repository secret"** again
-   - Name: `EXPO_PROJECT_ID`
-   - Value: Paste the ID from step 2
-   - Click **"Add secret"**
-
-4. **Generate Android credentials (1 minute):**
-   
-   **Important:** This step is required for CI/CD to work with Android builds.
-   
-   ```bash
-   cd apps/mobile
-   eas credentials
-   ```
-   - Select **Android**
-   - Select **qa** (build profile)
-   - Choose **"Keystore: Manage everything needed to build your project"**
-   - Choose **"Set up a new keystore"**
-   - Press **Enter** to accept the default name
-   - Choose **"yes"** to generate keystore in the cloud
-   - Press **any key** to continue
-   - Choose **"Go back"** to exit
-   
-   **✅ Android credentials created! CI/CD will now work.**
-
-5. **Add your app icons (Optional - 1 minute):**
-   
-   The template works without custom icons, but you can add your own:
-   
-   ```bash
-   cd apps/mobile/assets
-   # Add these files (examples of required sizes):
-   # icon.png (1024x1024) - Main app icon
-   # splash.png (1284x2778) - Launch screen background
-   ```
-   
-   Then update `apps/mobile/app.json`:
-   ```json
-   {
-     "expo": {
-       "icon": "./assets/icon.png",
-       "splash": {
-         "image": "./assets/splash.png",
-         "resizeMode": "contain",
-         "backgroundColor": "#ffffff"
-       },
-       "android": {
-         "adaptiveIcon": {
-           "foregroundImage": "./assets/icon.png",
-           "backgroundColor": "#FFFFFF"
-         }
-       }
-     }
-   }
-   ```
-
-### Mobile CI/CD Requirements
-
-**One-time setup for production mobile deployment:**
-
-5. **Configure App Store credentials (Production only):**
-   - **iOS:** Apple Developer account credentials for App Store submission
-   - **Android:** Google Play Console credentials for Play Store submission
-   - These are configured separately in your Expo dashboard when ready for production
-
-**✅ Your mobile CI/CD pipeline is now configured and ready!**
-
-### Mobile Deployment Environments
-
-#### **QA Environment (Internal Testing)**
-- **Trigger:** Push to `develop` branch
-- **Build profile:** `qa`
-- **Distribution:** Internal testing (TestFlight/Firebase App Distribution)
-- **Automatic:** Builds and distributes to testers
-
-#### **Production Environment (App Stores)**
-- **Trigger:** Manual approval workflow
-- **Build profile:** `production`
-- **Distribution:** App Store and Google Play Store
-- **Manual:** Requires approval for store submission
-
-### Mobile Testing Workflow
-
-1. **For QA Testing:**
-   ```bash
-   # Push to develop branch
-   git checkout develop
-   git merge feature/your-feature
-   git push origin develop
-   ```
-   - EAS automatically builds and distributes to testers
-   - Testers get notified via TestFlight (iOS) or email (Android)
-
-2. **Add Testers:**
-   ```bash
-   # iOS testers (TestFlight)
-   eas device:create --platform ios
-   
-   # Android testers get download links automatically
-   ```
-
-3. **For Production Release:**
-   - Go to GitHub → **Actions**
-   - Run **"Mobile Production Build"** workflow
-   - Manual approval required
-   - Automatically submits to App Store/Google Play
-
-### Mobile App Store Requirements
-
-#### **iOS App Store (Required for TestFlight)**
-- **Apple Developer Account:** $99/year
-- **Bundle ID:** Configure in `app.json`
-- **App Store Connect:** Set up app listing
-
-#### **Google Play Store (Required for Play Console)**
-- **Google Play Developer Account:** $25 one-time fee
-- **App Bundle:** Automatically generated by EAS
-- **Play Console:** Set up app listing
-
-### Mobile Development Commands
-
-```bash
-# Development
-cd apps/mobile
-eas build --profile qa              # Build QA version
-eas build --profile production      # Build production version
-eas submit --platform ios          # Submit to App Store
-eas submit --platform android      # Submit to Google Play
-
-# Testing
-expo start                          # Start development server
-expo start --clear                  # Clear cache and start
-```
-
-**📱 Your mobile CI/CD pipeline is now ready!**
-
----
-
-## Part 5: Infrastructure Deployment (Optional)
+## Part 3: Infrastructure Deployment (Optional)
 
 **Deploy your app to Google Cloud Platform:**
 
@@ -519,7 +249,7 @@ The script will prompt you for all required values.
 
 ---
 
-## Part 4: Production Infrastructure Setup
+## Part 5: Production Infrastructure Setup
 
 **Deploy to Google Cloud Platform (5 minutes):**
 
@@ -639,7 +369,7 @@ The script will prompt you for all required values.
 
 ---
 
-## Part 5: Deploy Your Application
+## Part 6: Deploy Your Application
 
 **Manual deployment with approval (enterprise-grade):**
 
@@ -682,7 +412,7 @@ The script will prompt you for all required values.
 
 ---
 
-## Part 6: Complete Workflow Summary
+## Part 7: Complete Workflow Summary
 
 **Your enterprise development workflow:**
 
@@ -725,19 +455,6 @@ pnpm typecheck          # Type check all packages
 pnpm validate-env       # Validate environment setup
 ```
 
-### Mobile Development Commands
-```bash
-cd apps/mobile
-expo start              # Start mobile development server
-expo start --clear      # Clear cache and start
-eas build --profile qa  # Build QA version for testing
-eas login               # Login to Expo account
-eas build:configure     # Configure EAS builds
-```
-
-### Optional: Firebase Test Lab Integration
-For automated testing across 50+ real devices, you can integrate Firebase Test Lab into your CI/CD pipeline. This provides automated crash detection, performance testing, and compatibility testing before reaching human testers. See Firebase Test Lab documentation for setup details.
-
 ### Database Commands
 ```bash
 pnpm db:generate        # Generate Prisma client
@@ -771,7 +488,6 @@ docker-compose logs postgres    # View database logs
 - **`apps/web`** - Main user-facing Next.js app (port 3001)
 - **`apps/admin`** - Administrative dashboard (port 3000)
 - **`apps/api`** - Express.js API server
-- **`apps/mobile`** - React Native mobile app with Expo SDK 52
 
 ### Shared Packages
 - **`@repo/ui`** - Shadcn/ui components with Tailwind CSS v4
@@ -931,12 +647,11 @@ chmod +x infrastructure/scripts/*.sh
 
 ## 🎯 Enterprise Features
 
-✅ **Full-Stack Support** - Web (Next.js) + Mobile (React Native/Expo)  
+✅ **Full-Stack Support** - Web (Next.js) + Admin Dashboard  
 ✅ **Type Safety** - Strict TypeScript with no `any` types  
 ✅ **Code Quality** - ESLint, Prettier, automated checks  
 ✅ **Security** - Workload Identity Federation, Secret Manager  
 ✅ **Scalability** - Monorepo architecture, shared packages  
-✅ **Mobile CI/CD** - EAS Build, TestFlight, Google Play deployment  
 ✅ **Monitoring** - Production alerts and logging  
 ✅ **Cost Optimization** - Environment-specific resource allocation  
 ✅ **Developer Experience** - Hot reload, automated setup  

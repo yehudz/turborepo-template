@@ -5,9 +5,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "node scripts/dev.js",
-    "dev:web": "turbo run dev --filter=\"!mobile\" --concurrency=15",
-    "dev:mobile": "turbo run dev --filter=mobile",
-    "dev:all": "turbo run dev --filter=\"!mobile\" --concurrency=15 & turbo run dev --filter=mobile",
+    "dev:web": "turbo run dev --concurrency=15",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",

@@ -1,6 +1,6 @@
 # create-yehudz-template
 
-> Create a new full-stack application with Next.js, React Native, and cloud deployment
+> Create a new full-stack application with Next.js and cloud deployment
 
 ## Usage
 
@@ -14,10 +14,9 @@ This CLI generates a modern turborepo template with:
 
 - 🌐 **Web App** - Next.js 15 with App Router
 - 🔧 **Admin Dashboard** - Management interface (optional)
-- 📱 **Mobile App** - Expo + React Native (optional)
 - 🚀 **API Backend** - Express.js server (optional)
 - ☁️ **Cloud Deployment** - GCP infrastructure with Terraform
-- 🎨 **UI Components** - shadcn/ui for web, Tamagui + NativeWind for mobile
+- 🎨 **UI Components** - shadcn/ui with Tailwind CSS v4
 - 🔐 **Authentication** - Appwrite integration
 - 📊 **Database** - PostgreSQL with Prisma ORM
 - 🚢 **CI/CD** - GitHub Actions with selective deployment
@@ -26,7 +25,7 @@ This CLI generates a modern turborepo template with:
 
 The CLI will ask you:
 
-1. **Which apps to include** (web, admin, mobile, api)
+1. **Which apps to include** (web, admin, api)
 2. **Cloud deployment platform** (GCP, AWS, or skip)
 3. **Install dependencies** automatically
 

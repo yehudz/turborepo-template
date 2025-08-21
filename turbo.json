@@ -44,19 +44,6 @@
     },
     "test": {
       "cache": false
-    },
-    "mobile:dev": {
-      "cache": false,
-      "persistent": true
-    },
-    "mobile:build": {
-      "cache": false
-    },
-    "mobile:build-qa": {
-      "cache": false
-    },
-    "mobile:build-production": {
-      "cache": false
     }
   }
 }
