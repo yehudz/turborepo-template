@@ -404,132 +404,186 @@
 
 ---
 
-## 🚀 NEXT PHASE: Mobile Enhancement & Template CLI
+## 🚀 CURRENT FEATURE: Next.js + Capacitor Mobile App Implementation
 
-**Status:** 📋 PLANNED  
-**Priority:** HIGH  
+**Status:** 🔄 IN PROGRESS  
+**Started:** Current Session  
+**Target Completion:** Current Session
 
-## 🎨 Phase 1: Mobile UI Enhancement (NEXT UP)
+## 📱 Phase 1: Next.js Mobile App Creation (NEXT UP)
 
-### 1.1 Re-integrate NativeWind + Tamagui 🎨
-- [ ] Add NativeWind back to mobile app configuration
-- [ ] Re-integrate Tamagui components in mobile UI package
-- [ ] Update `@repo/ui` to properly export both NativeWind and Tamagui
-- [ ] Create example components showcasing both libraries
-- [ ] Update mobile app to demonstrate NativeWind + Tamagui integration
-- [ ] Test styling compilation and build process
+### 1.1 Copy Web App Structure 📋
+- [ ] Create `apps/mobile` directory structure
+- [ ] Copy `apps/web/package.json` and adapt for mobile with Capacitor dependencies
+- [ ] Copy `apps/web/app` directory structure (layout.tsx, page.tsx, globals.css)
+- [ ] Copy `apps/web/lib` utilities and adapt for mobile
+- [ ] Copy configuration files (eslint.config.js, tsconfig.json, postcss.config.js)
+- [ ] Copy and adapt Next.js configuration for static export
 
-### 1.2 Enhanced Mobile UI Components 📱
-- [ ] Create comprehensive mobile component library
-- [ ] Add platform-specific styling examples
-- [ ] Implement responsive design patterns for mobile
-- [ ] Add dark mode support for mobile components
-- [ ] Create mobile-specific design tokens
-- [ ] Update documentation with mobile UI best practices
+### 1.2 Next.js Configuration for Capacitor 🔧
+- [ ] Update `next.config.ts` with static export settings (`output: 'export'`)
+- [ ] Configure `next.config.ts` with `images: { unoptimized: true }`
+- [ ] Set `reactStrictMode: true` for Capacitor compatibility
+- [ ] Configure build output directory for Capacitor (`distDir`)
+- [ ] Add asset prefix configuration if needed for mobile paths
+- [ ] Test Next.js static export generation
 
-## 🛠️ Phase 2: Enhanced Template CLI (HIGH PRIORITY)
+### 1.3 Capacitor Integration 📱
+- [ ] Install Capacitor core packages (`@capacitor/core`, `@capacitor/cli`)
+- [ ] Install Capacitor platform packages (`@capacitor/ios`, `@capacitor/android`)
+- [ ] Initialize Capacitor project with `npx cap init`
+- [ ] Configure `capacitor.config.ts` with app details and web directory
+- [ ] Add Capacitor native platforms (`npx cap add ios`, `npx cap add android`)
+- [ ] Configure build script to sync with Capacitor
 
-### 2.1 Comprehensive Template Generation Options 🎯
-- [ ] Update `npx create-yehudz-template` with three options:
-  - [ ] **Web Only**: Clone only web apps (web, admin, api) + packages
-  - [ ] **Web + Mobile**: Clone complete template with mobile app
-  - [ ] **Mobile Only**: Clone mobile app + necessary packages only
-- [ ] Add interactive prompts for template customization
-- [ ] Implement selective file copying based on user choice
-- [ ] Add post-generation setup instructions per template type
+### 1.4 Shadcn/ui Integration 🎨
+- [ ] Add Shadcn/ui to mobile app using existing `@repo/ui` components
+- [ ] Test Shadcn components render correctly in Capacitor WebView
+- [ ] Verify Tailwind CSS v4 works with static export
+- [ ] Add mobile-specific component variants if needed
+- [ ] Test touch interactions and mobile-optimized styling
+- [ ] Ensure responsive design works in mobile viewport
 
-### 2.2 Template Customization Features 🔧
-- [ ] Add company/project name customization during generation
-- [ ] Allow custom package naming (replace @repo with @company)
-- [ ] Add option to customize mobile app bundle identifiers
-- [ ] Implement template variant selection (basic vs full-featured)
-- [ ] Add database provider selection (PostgreSQL vs other options)
-- [ ] Include authentication provider options (Appwrite vs others)
+## 🚀 Phase 2: Mobile App Development Environment 🔧
 
-### 2.3 Enhanced CLI User Experience 📋
-- [ ] Add progress indicators during template generation
-- [ ] Implement validation for user inputs
-- [ ] Add confirmation step before file generation
-- [ ] Create post-generation setup wizard
-- [ ] Add option to automatically run initial setup commands
-- [ ] Include success message with next steps
+### 2.1 Development Workflow Integration 📋
+- [ ] Update `scripts/dev.js` to include mobile option
+- [ ] Add mobile app to interactive development menu
+- [ ] Configure mobile dev server to run on different port (3002)
+- [ ] Add mobile app to turbo.json with appropriate tasks
+- [ ] Test parallel development of web and mobile apps
+- [ ] Ensure hot reload works for mobile development
 
-## 📚 Phase 3: Account Setup Documentation (ADD TO README.md)
+### 2.2 Mobile Build System 🏗️
+- [ ] Add mobile build scripts to root package.json
+- [ ] Configure `pnpm build:mobile` command for static export + Capacitor sync
+- [ ] Add mobile-specific linting and typecheck commands
+- [ ] Set up mobile app deployment preparation scripts
+- [ ] Add Capacitor sync automation to build process
+- [ ] Test complete build pipeline end-to-end
 
-### 3.1 Apple Developer Account Setup 🍎
-- [ ] Add Apple Developer account setup section to README.md (bottom)
-- [ ] Document Apple ID requirements and verification process
-- [ ] Add step-by-step App Store Connect configuration
-- [ ] Include TestFlight setup instructions
-- [ ] Document certificate and provisioning profile creation
-- [ ] Add troubleshooting section for common Apple Developer issues
+### 2.3 Mobile-Specific UI Components 📱
+- [ ] Create mobile-optimized page layout with proper touch targets
+- [ ] Add mobile navigation patterns (bottom tabs or drawer)
+- [ ] Implement mobile-friendly form components
+- [ ] Add touch gestures and mobile interactions
+- [ ] Create mobile-specific loading and error states
+- [ ] Test components in actual Capacitor WebView
 
-### 3.2 Google Play Console Setup 🤖
-- [ ] Add Google Play Developer account section to README.md (bottom)
-- [ ] Document one-time $25 registration fee process
-- [ ] Add Play Console configuration instructions
-- [ ] Include app signing and release management setup
-- [ ] Document internal testing track configuration
-- [ ] Add Google Play policies and compliance checklist
+## 📚 Phase 3: Native Mobile Features 🔌
 
-### 3.3 Expo Account & EAS Setup 📱
-- [ ] Add Expo account setup section to README.md (bottom)
-- [ ] Document EAS CLI installation and authentication
-- [ ] Add project initialization and configuration steps
-- [ ] Include build quota and pricing information
-- [ ] Document secrets and credential management
-- [ ] Add Expo Go app setup for development testing
+### 3.1 Capacitor Plugin Integration ⚡
+- [ ] Add essential Capacitor plugins (Status Bar, Splash Screen)
+- [ ] Implement device info and platform detection
+- [ ] Add camera/photo library access if needed
+- [ ] Integrate push notifications setup
+- [ ] Add network connectivity detection
+- [ ] Test native features on iOS and Android simulators
 
-**Note:** All documentation will be added to the main README.md file at the bottom, creating a comprehensive setup guide for mobile deployment prerequisites.
+### 3.2 Mobile-Specific Authentication 🔐
+- [ ] Adapt Appwrite authentication for mobile app
+- [ ] Test authentication flow in Capacitor WebView
+- [ ] Add mobile-specific login/signup forms
+- [ ] Implement secure token storage using Capacitor preferences
+- [ ] Add biometric authentication option if needed
+- [ ] Test authentication persistence across app launches
 
-## 📱 Phase 4: Mobile App Store Deployment (FINAL PHASE)
+### 3.3 Mobile App Configuration 📱
+- [ ] Configure app icons and splash screens
+- [ ] Set up proper app bundle identifiers
+- [ ] Configure app permissions and privacy settings
+- [ ] Add app metadata and store descriptions
+- [ ] Set up proper app versioning
+- [ ] Configure deep linking and URL schemes
 
-### 4.1 iOS TestFlight Integration 🍎
-- [ ] Add TestFlight build profile to `apps/mobile/eas.json`
-- [ ] Create GitHub Action for TestFlight builds (`ios-testflight-build.yml`)
-- [ ] Configure automatic TestFlight submission workflow
-- [ ] Add secrets configuration (EXPO_TOKEN, Apple credentials)
-- [ ] Test complete iOS TestFlight workflow end-to-end
+## 🚢 Phase 4: Mobile App Testing & Deployment 🔧
 
-### 4.2 Android APK Direct Distribution 🤖
-- [ ] Add internal/preview build profile for Android APK distribution
-- [ ] Create GitHub Action for Android APK builds (`android-apk-build.yml`)
-- [ ] Configure direct APK download and sharing workflow
-- [ ] Add QR code generation for easy APK distribution
-- [ ] Test Android APK installation workflow
+### 4.1 Local Development Testing 📱
+- [ ] Set up iOS Simulator for local testing
+- [ ] Set up Android Emulator for local testing
+- [ ] Test mobile app in Safari developer tools
+- [ ] Test mobile app in Chrome device emulation
+- [ ] Configure live reload for mobile development
+- [ ] Test app performance in Capacitor WebView
 
-### 4.3 Mobile Deployment Documentation 📚
-- [ ] Create comprehensive mobile deployment guide
-- [ ] Add step-by-step TestFlight setup instructions
-- [ ] Document Android APK testing workflow
-- [ ] Add troubleshooting section for mobile builds
-- [ ] Include cost breakdown and requirements
-- [ ] Add tester onboarding instructions
+### 4.2 Mobile Build & Distribution 📦
+- [ ] Configure Capacitor build scripts for iOS
+- [ ] Configure Capacitor build scripts for Android
+- [ ] Set up development signing for iOS builds
+- [ ] Set up debug keystore for Android builds
+- [ ] Test local device installation via Xcode
+- [ ] Test local device installation via Android Studio
 
-## 🎯 Success Criteria for Next Phase
+### 4.3 Mobile Documentation & Setup Guide 📚
+- [ ] Add mobile development section to main README.md
+- [ ] Document Capacitor setup and requirements
+- [ ] Add iOS/Android development prerequisites
+- [ ] Create mobile app testing instructions
+- [ ] Add troubleshooting guide for mobile builds
+- [ ] Document mobile app deployment process
 
-### Phase 1 Success (UI Libraries):
-1. [ ] **NativeWind + Tamagui** fully integrated in mobile UI
-2. [ ] **Mobile components** showcase both styling libraries
-3. [ ] **Platform-specific exports** work correctly
-4. [ ] **Build process** compiles styling without errors
+## 🎯 Phase 5: Integration & Polish ✨
 
-### Phase 2 Success (Template CLI):
-1. [ ] **Template CLI offers 3 options**: Web-only, Web+Mobile, Mobile-only
-2. [ ] **Customization features** work for company/project names
-3. [ ] **Selective file copying** generates correct variants
-4. [ ] **Post-generation setup** guides users properly
+### 5.1 Template CLI Integration 🔧
+- [ ] Update `create-yehudz-template` to include mobile option
+- [ ] Add mobile app generation to CLI prompts
+- [ ] Test template generation with mobile app included
+- [ ] Update CLI documentation for mobile support
+- [ ] Add mobile-specific setup instructions to generated projects
+- [ ] Test complete template with mobile app
 
-### Phase 3 Success (Documentation in README.md):
-1. [ ] **Apple Developer setup** section added to README.md
-2. [ ] **Google Play Console** setup section added to README.md
-3. [ ] **Expo account setup** section added to README.md
-4. [ ] **Prerequisites** clearly documented before deployment sections
+### 5.2 Development Experience Polish 💎
+- [ ] Ensure dev script handles mobile app gracefully
+- [ ] Add proper error handling for missing mobile dependencies
+- [ ] Create helpful error messages for mobile setup issues
+- [ ] Add mobile app health checks to validate environment
+- [ ] Test complete development workflow from clone to mobile build
+- [ ] Polish mobile app user interface and interactions
 
-### Phase 4 Success (Deployment):
-1. [ ] **iOS apps deploy to TestFlight** via GitHub Actions
-2. [ ] **Android apps distribute as APKs** for internal testing
-3. [ ] **All deployment workflows** documented and tested
+### 5.3 Final Testing & Validation ✅
+- [ ] Test complete mobile app on iOS device/simulator
+- [ ] Test complete mobile app on Android device/emulator
+- [ ] Validate Shadcn/ui components work correctly in mobile
+- [ ] Test authentication flow in mobile app
+- [ ] Validate mobile app performance and responsiveness
+- [ ] Confirm mobile app meets accessibility standards
+
+## 🎯 Next.js + Capacitor Success Criteria
+
+### Phase 1 Success (Next.js Mobile App):
+1. [ ] **Next.js mobile app** created by copying web app structure
+2. [ ] **Static export** configured and working for Capacitor
+3. [ ] **Capacitor integration** complete with iOS/Android platforms
+4. [ ] **Shadcn/ui components** render correctly in mobile WebView
+5. [ ] **Mobile app** boots successfully in simulator
+
+### Phase 2 Success (Development Environment):
+1. [ ] **Mobile dev server** integrated into development workflow
+2. [ ] **Build system** generates static export and syncs with Capacitor
+3. [ ] **Mobile-specific UI** components optimized for touch
+4. [ ] **Hot reload** works for mobile development
+5. [ ] **All commands** (dev, build, lint, typecheck) work for mobile
+
+### Phase 3 Success (Native Features):
+1. [ ] **Capacitor plugins** integrated for essential mobile features
+2. [ ] **Authentication** works in mobile Capacitor WebView
+3. [ ] **App configuration** complete with icons and metadata
+4. [ ] **Mobile navigation** patterns implemented
+5. [ ] **Native feel** achieved through proper mobile UX
+
+### Phase 4 Success (Testing & Deployment):
+1. [ ] **iOS simulator** testing works locally
+2. [ ] **Android emulator** testing works locally
+3. [ ] **Mobile builds** generate successfully for both platforms
+4. [ ] **Device installation** works via development tools
+5. [ ] **Documentation** complete for mobile development setup
+
+### Phase 5 Success (Integration):
+1. [ ] **Template CLI** includes mobile option
+2. [ ] **Development workflow** seamless for all apps
+3. [ ] **Error handling** graceful for mobile dependencies
+4. [ ] **Complete testing** on real iOS/Android devices
+5. [ ] **Production readiness** for mobile app deployment
 
 ---
 
